@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
 import {
   Search, Send, Plus, Paperclip, Smile,
   Check, CheckCheck, Clock, Archive, Star,
@@ -33,7 +34,7 @@ type Message = {
   timestamp: string
   status: 'sending' | 'sent' | 'delivered' | 'read'
   type: 'text' | 'image' | 'file' | 'location' | 'donation'
-  attachments?: any[]
+  attachments?: (string | { url: string; type: string; name: string } | { lat: number; lng: number; address: string })[]
   replyTo?: Message
   isEdited?: boolean
 }
@@ -122,6 +123,7 @@ export default function MessagesPage() {
     if (mockConversations.length > 0 && !selectedConversation) {
       setSelectedConversation(mockConversations[0])
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
@@ -358,12 +360,14 @@ export default function MessagesPage() {
               </span>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              {message.attachments?.map((url, idx) => (
-                <img
+              {message.attachments?.map((attachment, idx) => (
+                <Image
                   key={idx}
-                  src={url}
+                  src={typeof attachment === 'string' ? attachment : (attachment as { url: string }).url}
                   alt="Attachment"
-                  className="rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                  width={200}
+                  height={200}
+                  className="rounded-lg cursor-pointer hover:opacity-90 transition-opacity object-cover"
                 />
               ))}
             </div>
@@ -374,9 +378,11 @@ export default function MessagesPage() {
             )}
           </div>
           {!isMe && message.senderAvatar && (
-            <img
+            <Image
               src={message.senderAvatar}
               alt={message.senderName}
+              width={32}
+              height={32}
               className="w-8 h-8 rounded-full mr-3 order-0"
             />
           )}
@@ -385,7 +391,7 @@ export default function MessagesPage() {
     }
 
     if (message.type === 'location') {
-      const location = message.attachments?.[0]
+      const location = message.attachments?.[0] as { lat: number; lng: number; address: string } | undefined
       return (
         <div className={`flex ${isMe ? 'justify-end' : 'justify-start'} mb-4`}>
           <div className={`max-w-sm ${isMe ? 'order-2' : 'order-1'}`}>
@@ -416,9 +422,11 @@ export default function MessagesPage() {
             )}
           </div>
           {!isMe && message.senderAvatar && (
-            <img
+            <Image
               src={message.senderAvatar}
               alt={message.senderName}
+              width={32}
+              height={32}
               className="w-8 h-8 rounded-full mr-3 order-0"
             />
           )}
@@ -428,13 +436,15 @@ export default function MessagesPage() {
 
     return (
       <div className={`flex ${isMe ? 'justify-end' : 'justify-start'} mb-4`}>
-        {!isMe && message.senderAvatar && (
-          <img
-            src={message.senderAvatar}
-            alt={message.senderName}
-            className="w-8 h-8 rounded-full mr-3"
-          />
-        )}
+          {!isMe && message.senderAvatar && (
+            <Image
+              src={message.senderAvatar}
+              alt={message.senderName}
+              width={32}
+              height={32}
+              className="w-8 h-8 rounded-full mr-3"
+            />
+          )}
         <div className={`max-w-sm ${isMe ? 'order-2' : 'order-1'}`}>
           {selectedConversation?.type === 'group' && !isMe && (
             <div className="text-xs text-gray-500 mb-1">{message.senderName}</div>
@@ -503,9 +513,11 @@ export default function MessagesPage() {
             >
               <div className="flex items-start space-x-3">
                 <div className="relative">
-                  <img
+                  <Image
                     src={conversation.avatar || 'https://i.pravatar.cc/150'}
                     alt={conversation.name}
+                    width={48}
+                    height={48}
                     className="w-12 h-12 rounded-full"
                   />
                   {conversation.isOnline && (
@@ -561,9 +573,11 @@ export default function MessagesPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="relative">
-                  <img
+                  <Image
                     src={selectedConversation.avatar || 'https://i.pravatar.cc/150'}
                     alt={selectedConversation.name}
+                    width={40}
+                    height={40}
                     className="w-10 h-10 rounded-full"
                   />
                   {selectedConversation.isOnline && (
@@ -604,9 +618,11 @@ export default function MessagesPage() {
             {messages.map(message => renderMessage(message))}
             {isTyping && (
               <div className="flex items-center space-x-2 text-gray-500">
-                <img
-                  src={selectedConversation.avatar}
+                <Image
+                  src={selectedConversation.avatar || 'https://i.pravatar.cc/150'}
                   alt={selectedConversation.name}
+                  width={24}
+                  height={24}
                   className="w-6 h-6 rounded-full"
                 />
                 <div className="bg-gray-100 rounded-lg px-4 py-2">
@@ -682,9 +698,11 @@ export default function MessagesPage() {
       {showInfo && selectedConversation && (
         <div className="w-80 bg-white border-l border-gray-200 p-6">
           <div className="text-center mb-6">
-            <img
+            <Image
               src={selectedConversation.avatar || 'https://i.pravatar.cc/150'}
               alt={selectedConversation.name}
+              width={96}
+              height={96}
               className="w-24 h-24 rounded-full mx-auto mb-3"
             />
             <h3 className="text-lg font-medium text-gray-900">
@@ -729,9 +747,11 @@ export default function MessagesPage() {
                 <div className="space-y-2">
                   {selectedConversation.participants.map((participant, idx) => (
                     <div key={idx} className="flex items-center space-x-2">
-                      <img
+                      <Image
                         src={`https://i.pravatar.cc/150?u=${participant}`}
                         alt={participant}
+                        width={32}
+                        height={32}
                         className="w-8 h-8 rounded-full"
                       />
                       <span className="text-sm text-gray-700">{participant}</span>

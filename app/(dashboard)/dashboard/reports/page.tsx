@@ -9,11 +9,9 @@ import {
 } from 'lucide-react'
 
 type TimeRange = 'week' | 'month' | 'quarter' | 'year' | 'custom'
-type ChartType = 'line' | 'bar' | 'pie' | 'area'
 
 export default function ReportsPage() {
   const [timeRange, setTimeRange] = useState<TimeRange>('month')
-  const [selectedMetric, setSelectedMetric] = useState('donations')
   const [compareMode, setCompareMode] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -34,12 +32,12 @@ export default function ReportsPage() {
   ]
 
   const categoryDistribution = [
-    { category: 'Alimentos', value: 35, color: '#3B82F6' },
-    { category: 'Ropa', value: 25, color: '#10B981' },
-    { category: 'Medicinas', value: 15, color: '#F59E0B' },
-    { category: 'Juguetes', value: 10, color: '#EF4444' },
-    { category: 'Muebles', value: 8, color: '#8B5CF6' },
-    { category: 'Otros', value: 7, color: '#6B7280' }
+    { label: 'Alimentos', value: 35, color: '#3B82F6' },
+    { label: 'Ropa', value: 25, color: '#10B981' },
+    { label: 'Medicinas', value: 15, color: '#F59E0B' },
+    { label: 'Juguetes', value: 10, color: '#EF4444' },
+    { label: 'Muebles', value: 8, color: '#8B5CF6' },
+    { label: 'Otros', value: 7, color: '#6B7280' }
   ]
 
   const topDonors = [
@@ -136,14 +134,20 @@ export default function ReportsPage() {
     setTimeout(() => setLoading(false), 1500)
   }
 
-  const handleExport = (format: 'pdf' | 'excel' | 'csv') => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`Exporting report as ${format}`)
-    }
-    // TODO: Implement actual export functionality
+  type ChartDataPoint = {
+    month: string
+    donations: number
+    deliveries: number
+    beneficiaries: number
   }
 
-  const renderLineChart = (data: any[]) => {
+  type PieDataPoint = {
+    label: string
+    value: number
+    color: string
+  }
+
+  const renderLineChart = (data: ChartDataPoint[]) => {
     const maxValue = Math.max(...data.map(d => Math.max(d.donations, d.deliveries, d.beneficiaries)))
     return (
       <div className="relative h-64">
@@ -177,7 +181,7 @@ export default function ReportsPage() {
     )
   }
 
-  const renderPieChart = (data: any[]) => {
+  const renderPieChart = (data: PieDataPoint[]) => {
     const total = data.reduce((sum, item) => sum + item.value, 0)
     let cumulativePercentage = 0
 
@@ -221,7 +225,7 @@ export default function ReportsPage() {
                 className="w-3 h-3 rounded-full mr-2"
                 style={{ backgroundColor: item.color }}
               />
-              <span className="text-sm text-gray-700">{item.category}</span>
+              <span className="text-sm text-gray-700">{item.label}</span>
               <span className="ml-2 text-sm font-medium text-gray-900">{item.value}%</span>
             </div>
           ))}
@@ -501,19 +505,19 @@ export default function ReportsPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-blue-50 rounded-lg p-4">
                   <p className="text-sm text-gray-700">
-                    "Gracias a DONA+ pudimos equipar completamente nuestra escuela con materiales educativos."
+                    &ldquo;Gracias a DONA+ pudimos equipar completamente nuestra escuela con materiales educativos.&rdquo;
                   </p>
                   <p className="text-xs text-gray-500 mt-2">- Centro Educativo Esperanza</p>
                 </div>
                 <div className="bg-green-50 rounded-lg p-4">
                   <p className="text-sm text-gray-700">
-                    "Las donaciones de alimentos han sido vitales para nuestras 25 familias residentes."
+                    &ldquo;Las donaciones de alimentos han sido vitales para nuestras 25 familias residentes.&rdquo;
                   </p>
                   <p className="text-xs text-gray-500 mt-2">- Hogar Santa Ana</p>
                 </div>
                 <div className="bg-purple-50 rounded-lg p-4">
                   <p className="text-sm text-gray-700">
-                    "La plataforma nos permite conectar donantes con necesitados de manera eficiente."
+                    &ldquo;La plataforma nos permite conectar donantes con necesitados de manera eficiente.&rdquo;
                   </p>
                   <p className="text-xs text-gray-500 mt-2">- Voluntarios San José</p>
                 </div>

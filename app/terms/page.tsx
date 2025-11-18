@@ -93,7 +93,7 @@ export default function TermsPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">7. Limitación de Responsabilidad</h2>
               <p className="text-gray-700 mb-4">
-                DONA+ se proporciona "tal cual" sin garantías de ningún tipo. No seremos responsables por:
+                DONA+ se proporciona &ldquo;tal cual&rdquo; sin garantías de ningún tipo. No seremos responsables por:
               </p>
               <ul className="list-disc pl-6 text-gray-700 space-y-2">
                 <li>Daños indirectos, incidentales o consecuentes</li>

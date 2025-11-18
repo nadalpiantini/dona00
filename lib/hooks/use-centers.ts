@@ -51,8 +51,9 @@ export function useCenters(filters?: {
       if (queryError) throw queryError
 
       setCenters(data || [])
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error')
+      setError(error.message)
       toast.error('Error al cargar centros de acopio')
     } finally {
       setLoading(false)
@@ -76,8 +77,9 @@ export function useCenters(filters?: {
       toast.success('Centro de acopio creado exitosamente')
       await loadCenters()
       return data
-    } catch (err: any) {
-      toast.error(err.message || 'Error al crear el centro de acopio')
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error')
+      toast.error(error.message || 'Error al crear el centro de acopio')
       throw err
     }
   }
@@ -100,8 +102,9 @@ export function useCenters(filters?: {
       toast.success('Centro de acopio actualizado exitosamente')
       await loadCenters()
       return data
-    } catch (err: any) {
-      toast.error(err.message || 'Error al actualizar el centro de acopio')
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error')
+      toast.error(error.message || 'Error al actualizar el centro de acopio')
       throw err
     }
   }
@@ -117,8 +120,9 @@ export function useCenters(filters?: {
 
       toast.success('Centro de acopio eliminado exitosamente')
       await loadCenters()
-    } catch (err: any) {
-      toast.error(err.message || 'Error al eliminar el centro de acopio')
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error')
+      toast.error(error.message || 'Error al eliminar el centro de acopio')
       throw err
     }
   }

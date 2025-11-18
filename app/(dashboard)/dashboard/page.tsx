@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useAuth } from '@/components/providers/auth-provider'
 import { useStats } from '@/lib/hooks/use-stats'
 import { useDonations } from '@/lib/hooks/use-donations'
@@ -221,10 +222,12 @@ export default function DashboardPage() {
               {recentDonations.map((donation) => (
                 <div key={donation.id} className="p-4 hover:bg-gray-50 transition-colors">
                   <div className="flex items-center space-x-4">
-                    <img
+                    <Image
                       src={donation.image}
                       alt={donation.title}
                       className="h-12 w-12 rounded-lg object-cover"
+                      width={48}
+                      height={48}
                     />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">

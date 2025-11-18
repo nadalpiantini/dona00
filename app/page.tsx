@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useAuth } from '@/components/providers/auth-provider'
 import { Heart, Truck, Users, Shield, MapPin, Package, ChevronRight, Menu, X } from 'lucide-react'
@@ -194,9 +195,11 @@ export default function HomePage() {
           </div>
 
           <div className="mt-16">
-            <img
+            <Image
               src="https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?w=1200&h=600&fit=crop"
               alt="Donaciones y solidaridad"
+              width={1200}
+              height={600}
               className="rounded-2xl shadow-2xl w-full object-cover h-[400px]"
             />
           </div>

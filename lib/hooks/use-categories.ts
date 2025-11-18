@@ -10,10 +10,6 @@ export function useCategories() {
   const [error, setError] = useState<string | null>(null)
   const supabase = createClient()
 
-  useEffect(() => {
-    loadCategories()
-  }, [])
-
   const loadCategories = async () => {
     try {
       setLoading(true)
@@ -28,12 +24,17 @@ export function useCategories() {
       if (queryError) throw queryError
 
       setCategories(data || [])
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error')
+      setError(error.message)
     } finally {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    loadCategories()
+  }, [loadCategories])
 
   return {
     categories,

@@ -18,18 +18,6 @@ export function useDonations(filters?: {
   const [total, setTotal] = useState(0)
   const supabase = createClient()
 
-  // Memoize filter dependencies to avoid unnecessary re-fetches
-  const filterKey = useMemo(() => 
-    JSON.stringify({ 
-      status: filters?.status, 
-      categoryId: filters?.categoryId, 
-      search: filters?.search, 
-      limit: filters?.limit, 
-      offset: filters?.offset 
-    }), 
-    [filters?.status, filters?.categoryId, filters?.search, filters?.limit, filters?.offset]
-  )
-
   const loadDonations = useCallback(async () => {
     try {
       setLoading(true)
@@ -73,8 +61,9 @@ export function useDonations(filters?: {
 
       setDonations(data || [])
       setTotal(count || 0)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error')
+      setError(error.message)
       toast.error('Error al cargar donaciones')
     } finally {
       setLoading(false)
@@ -104,8 +93,9 @@ export function useDonations(filters?: {
       toast.success('Donación creada exitosamente')
       await loadDonations()
       return data
-    } catch (err: any) {
-      toast.error(err.message || 'Error al crear la donación')
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error')
+      toast.error(error.message || 'Error al crear la donación')
       throw err
     }
   }, [supabase, loadDonations])
@@ -130,8 +120,9 @@ export function useDonations(filters?: {
       toast.success('Donación actualizada exitosamente')
       await loadDonations()
       return data
-    } catch (err: any) {
-      toast.error(err.message || 'Error al actualizar la donación')
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error')
+      toast.error(error.message || 'Error al actualizar la donación')
       throw err
     }
   }, [supabase, loadDonations])
@@ -147,8 +138,9 @@ export function useDonations(filters?: {
 
       toast.success('Donación eliminada exitosamente')
       await loadDonations()
-    } catch (err: any) {
-      toast.error(err.message || 'Error al eliminar la donación')
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error')
+      toast.error(error.message || 'Error al eliminar la donación')
       throw err
     }
   }, [supabase, loadDonations])

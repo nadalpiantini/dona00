@@ -58,8 +58,9 @@ export function useDeliveries(filters?: {
       if (queryError) throw queryError
 
       setDeliveries(data || [])
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error')
+      setError(error.message)
       toast.error('Error al cargar entregas')
     } finally {
       setLoading(false)
@@ -91,8 +92,9 @@ export function useDeliveries(filters?: {
       toast.success('Entrega creada exitosamente')
       await loadDeliveries()
       return data
-    } catch (err: any) {
-      toast.error(err.message || 'Error al crear la entrega')
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error')
+      toast.error(error.message || 'Error al crear la entrega')
       throw err
     }
   }
@@ -117,8 +119,9 @@ export function useDeliveries(filters?: {
       toast.success('Entrega actualizada exitosamente')
       await loadDeliveries()
       return data
-    } catch (err: any) {
-      toast.error(err.message || 'Error al actualizar la entrega')
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error')
+      toast.error(error.message || 'Error al actualizar la entrega')
       throw err
     }
   }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useDonations } from '@/lib/hooks/use-donations'
 import { useCategories } from '@/lib/hooks/use-categories'
@@ -311,10 +312,12 @@ export default function DonationsPage() {
                   <div key={donation.id} className="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow">
                     <div className="relative">
                       {donation.images && donation.images.length > 0 && (
-                        <img
+                        <Image
                           className="h-48 w-full object-cover"
                           src={Array.isArray(donation.images) ? donation.images[0] : donation.images}
                           alt={donation.title}
+                          width={400}
+                          height={192}
                         />
                       )}
                       {donation.is_urgent && (
@@ -411,10 +414,12 @@ export default function DonationsPage() {
                           <div className="flex items-center">
                             {donation.images && donation.images.length > 0 && (
                               <div className="flex-shrink-0">
-                                <img 
+                                <Image 
                                   className="h-16 w-16 rounded-lg object-cover" 
                                   src={Array.isArray(donation.images) ? donation.images[0] : donation.images} 
-                                  alt={donation.title} 
+                                  alt={donation.title}
+                                  width={64}
+                                  height={64}
                                 />
                               </div>
                             )}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { useAuth } from '@/components/providers/auth-provider'
 import {
   User, Bell, Shield, Palette, Globe, CreditCard, Users,
@@ -145,10 +146,12 @@ export default function SettingsPage() {
                       Foto de Perfil
                     </label>
                     <div className="flex items-center space-x-4">
-                      <img
+                      <Image
                         src={profileData.avatar}
                         alt="Avatar"
                         className="h-20 w-20 rounded-full"
+                        width={80}
+                        height={80}
                       />
                       <div>
                         <button className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
@@ -443,10 +446,10 @@ export default function SettingsPage() {
                   <div className="mb-8">
                     <h3 className="text-md font-medium text-gray-900 mb-4">Tema</h3>
                     <div className="grid grid-cols-3 gap-4">
-                      {['light', 'dark', 'auto'].map((theme) => (
+                      {(['light', 'dark', 'auto'] as const).map((theme) => (
                         <button
                           key={theme}
-                          onClick={() => setAppearance({ ...appearance, theme: theme as any })}
+                          onClick={() => setAppearance({ ...appearance, theme })}
                           className={`p-4 border rounded-lg flex flex-col items-center space-y-2 transition-colors ${
                             appearance.theme === theme
                               ? 'border-blue-500 bg-blue-50'
@@ -527,10 +530,12 @@ export default function SettingsPage() {
                       Logo de la Empresa
                     </label>
                     <div className="flex items-center space-x-4">
-                      <img
+                      <Image
                         src={organization.logo}
                         alt="Logo"
                         className="h-20 w-20 rounded-lg border border-gray-200"
+                        width={80}
+                        height={80}
                       />
                       <div>
                         <button className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
