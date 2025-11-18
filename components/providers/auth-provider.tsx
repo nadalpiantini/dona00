@@ -59,22 +59,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (!mounted) return
 
         // AuthSessionMissingError is normal when user is not logged in
-        // Only log actual errors, not missing session errors
+        // Silently handle all session-related errors - they're expected
         if (error) {
           // Check if it's a session missing error (normal state)
-          const isSessionMissing = error.message?.includes('session') || 
-                                   error.message?.includes('Session') ||
-                                   error.name === 'AuthSessionMissingError'
+          const isSessionMissing = 
+            error.message?.toLowerCase().includes('session') || 
+            error.message?.toLowerCase().includes('auth session') ||
+            error.name === 'AuthSessionMissingError' ||
+            error.status === 401 ||
+            error.message?.includes('JWT')
           
-          if (!isSessionMissing) {
-            // Only log non-session errors
-            if (process.env.NODE_ENV === 'development') {
-              console.error('Error getting user:', error)
-            }
+          // Never log session missing errors - they're completely normal
+          // Only log unexpected errors in development
+          if (!isSessionMissing && process.env.NODE_ENV === 'development') {
+            console.error('Error getting user:', error)
           }
           // Set user to null and stop loading regardless of error type
           setUser(null)
-          setLoading(false)
+          if (mounted) {
+            setLoading(false)
+          }
           return
         }
 
@@ -82,20 +86,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (user) {
           await fetchProfile(user.id)
         }
+        if (mounted) {
+          setLoading(false)
+        }
       } catch (err) {
         if (!mounted) return
         // Check if it's a session missing error
-        const error = err as Error
-        const isSessionMissing = error.message?.includes('session') || 
-                                 error.message?.includes('Session') ||
-                                 error.name === 'AuthSessionMissingError'
+        const error = err as Error & { name?: string; message?: string; status?: number }
+        const isSessionMissing = 
+          error.message?.toLowerCase().includes('session') || 
+          error.message?.toLowerCase().includes('auth session') ||
+          error.name === 'AuthSessionMissingError' ||
+          error.status === 401 ||
+          error.message?.includes('JWT')
         
+        // Never log session missing errors
         if (!isSessionMissing && process.env.NODE_ENV === 'development') {
           console.error('Error in getUser:', err)
         }
         // Set user to null on any error
         setUser(null)
-      } finally {
         if (mounted) {
           setLoading(false)
         }
@@ -141,23 +151,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (email: string, password: string, fullName: string, phone?: string) => {
     try {
+      // Verify Supabase client is properly configured
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      
+      if (!supabaseUrl || !supabaseAnonKey) {
+        const errorMsg = 'Error de configuración: Variables de entorno de Supabase no encontradas'
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Missing Supabase env vars:', { supabaseUrl: !!supabaseUrl, supabaseAnonKey: !!supabaseAnonKey })
+        }
+        toast.error(errorMsg)
+        throw new Error(errorMsg)
+      }
+
       // Step 1: Create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+        },
       })
 
       if (authError) {
-        // Check if it's a 401 or network error
-        const errorMessage = authError.message || 'Error al crear la cuenta'
-        
-        // Log detailed error in development
+        // Log detailed error in development for debugging
         if (process.env.NODE_ENV === 'development') {
           console.error('Signup auth error:', {
             message: authError.message,
             status: authError.status,
             name: authError.name,
+            supabaseUrl: supabaseUrl ? 'configured' : 'missing',
+            anonKey: supabaseAnonKey ? 'configured' : 'missing',
           })
+        }
+        
+        // Provide user-friendly error messages
+        let errorMessage = 'Error al crear la cuenta'
+        if (authError.status === 401) {
+          errorMessage = 'Error de autenticación. Verifica que las credenciales de Supabase estén correctas.'
+        } else if (authError.status === 422) {
+          errorMessage = authError.message || 'Datos inválidos. Verifica tu email y contraseña.'
+        } else if (authError.status === 429) {
+          errorMessage = 'Demasiados intentos. Por favor intenta más tarde.'
+        } else {
+          errorMessage = authError.message || 'Error al crear la cuenta. Por favor intenta de nuevo.'
         }
         
         toast.error(errorMessage)

@@ -37,7 +37,9 @@ function ResetPasswordForm() {
           })
 
           if (error) {
-            console.error('Error setting recovery session:', error)
+            if (process.env.NODE_ENV === 'development') {
+              console.error('Error setting recovery session:', error)
+            }
             setError('El enlace de recuperación no es válido o ha expirado')
             setIsValidToken(false)
             return
@@ -57,7 +59,9 @@ function ResetPasswordForm() {
           }
         }
       } catch (err) {
-        console.error('Error handling password reset:', err)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Error handling password reset:', err)
+        }
         setError('Error al procesar el enlace de recuperación')
       }
     }
