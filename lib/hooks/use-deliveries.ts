@@ -18,6 +18,7 @@ export function useDeliveries(filters?: {
 
   useEffect(() => {
     loadDeliveries()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters?.status, filters?.search, filters?.driverId, filters?.beneficiaryId])
 
   const loadDeliveries = async () => {

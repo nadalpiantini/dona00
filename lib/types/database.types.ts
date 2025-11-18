@@ -1,6 +1,6 @@
 export type UserRole = 'super_admin' | 'org_admin' | 'org_member' | 'driver' | 'beneficiary' | 'donor'
 export type DonationStatus = 'pending' | 'published' | 'claimed' | 'in_transit' | 'delivered' | 'cancelled'
-export type DeliveryStatus = 'pending' | 'accepted' | 'picked_up' | 'in_transit' | 'delivered' | 'cancelled'
+export type DeliveryStatus = 'pending' | 'scheduled' | 'accepted' | 'picked_up' | 'in_transit' | 'delivered' | 'cancelled' | 'failed'
 export type CenterStatus = 'active' | 'inactive' | 'full' | 'accepting'
 
 export interface Organization {

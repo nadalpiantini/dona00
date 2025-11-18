@@ -5,7 +5,7 @@ import { useStats } from '@/lib/hooks/use-stats'
 import { useDonations } from '@/lib/hooks/use-donations'
 import { useDeliveries } from '@/lib/hooks/use-deliveries'
 import {
-  Package, Users, Truck, MapPin, TrendingUp,
+  Package, Users, Truck, MapPin, TrendingUp, TrendingDown,
   Heart, ChevronRight, Calendar, Loader2
 } from 'lucide-react'
 import Link from 'next/link'
@@ -20,12 +20,19 @@ export default function DashboardPage() {
     // Add more filters as needed
   })
 
-  const statsCards = [
+  const statsCards: Array<{
+    title: string
+    value: string
+    change: string
+    trend: 'up' | 'down' | 'neutral'
+    icon: React.ComponentType<{ className?: string }>
+    color: string
+  }> = [
     {
       title: 'Total Donaciones',
       value: stats.totalDonations.toString(),
       change: '+12%',
-      trend: 'up' as const,
+      trend: 'up',
       icon: Package,
       color: 'bg-blue-500',
     },
@@ -33,7 +40,7 @@ export default function DashboardPage() {
       title: 'Beneficiarios Activos',
       value: stats.totalBeneficiaries.toString(),
       change: '+5%',
-      trend: 'up' as const,
+      trend: 'up',
       icon: Users,
       color: 'bg-green-500',
     },
@@ -41,7 +48,7 @@ export default function DashboardPage() {
       title: 'Entregas Completadas',
       value: stats.deliveredDonations.toString(),
       change: '+18%',
-      trend: 'up' as const,
+      trend: 'up',
       icon: Truck,
       color: 'bg-purple-500',
     },
@@ -49,7 +56,7 @@ export default function DashboardPage() {
       title: 'Centros de Acopio',
       value: stats.totalCenters.toString(),
       change: '0%',
-      trend: 'neutral' as const,
+      trend: 'neutral',
       icon: MapPin,
       color: 'bg-orange-500',
     },
@@ -168,16 +175,16 @@ export default function DashboardPage() {
                           <span className="text-green-600 font-medium">{stat.change}</span>
                           <span className="text-gray-500 ml-1">vs último mes</span>
                         </>
-                      ) : stat.trend === 'down' ? (
+                      ) : stat.trend === 'neutral' ? (
+                        <>
+                          <span className="text-gray-600 font-medium">{stat.change}</span>
+                          <span className="text-gray-500 ml-1">sin cambios</span>
+                        </>
+                      ) : (
                         <>
                           <TrendingDown className="h-4 w-4 text-red-500 mr-1" />
                           <span className="text-red-600 font-medium">{stat.change}</span>
                           <span className="text-gray-500 ml-1">vs último mes</span>
-                        </>
-                      ) : (
-                        <>
-                          <span className="text-gray-600 font-medium">{stat.change}</span>
-                          <span className="text-gray-500 ml-1">sin cambios</span>
                         </>
                       )}
                     </div>

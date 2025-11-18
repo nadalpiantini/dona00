@@ -17,6 +17,7 @@ export function useCenters(filters?: {
 
   useEffect(() => {
     loadCenters()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters?.status, filters?.search, filters?.organizationId])
 
   const loadCenters = async () => {

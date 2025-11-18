@@ -17,21 +17,62 @@ function ResetPasswordForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [isValidToken, setIsValidToken] = useState(false)
 
   useEffect(() => {
-    // Check if we have the necessary tokens
-    const hashParams = new URLSearchParams(window.location.hash.substring(1))
-    const accessToken = hashParams.get('access_token')
-    const type = hashParams.get('type')
+    // Handle password reset token from URL
+    const handlePasswordReset = async () => {
+      try {
+        // Check URL hash for recovery token
+        const hashParams = new URLSearchParams(window.location.hash.substring(1))
+        const accessToken = hashParams.get('access_token')
+        const refreshToken = hashParams.get('refresh_token')
+        const type = hashParams.get('type')
 
-    if (type === 'recovery' && accessToken) {
-      // Token is in the URL hash, Supabase will handle it
+        if (type === 'recovery' && accessToken && refreshToken) {
+          // Set the session with the recovery tokens
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          })
+
+          if (error) {
+            console.error('Error setting recovery session:', error)
+            setError('El enlace de recuperación no es válido o ha expirado')
+            setIsValidToken(false)
+            return
+          }
+
+          // Clear URL hash for security
+          window.history.replaceState(null, '', window.location.pathname)
+          setIsValidToken(true)
+        } else {
+          // Check if we have an active session (user already authenticated)
+          const { data: { session } } = await supabase.auth.getSession()
+          if (session) {
+            setIsValidToken(true)
+          } else {
+            setError('No se encontró un enlace de recuperación válido. Por favor solicita uno nuevo.')
+            setIsValidToken(false)
+          }
+        }
+      } catch (err) {
+        console.error('Error handling password reset:', err)
+        setError('Error al procesar el enlace de recuperación')
+      }
     }
-  }, [])
+
+    handlePasswordReset()
+  }, [supabase])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+
+    if (!isValidToken) {
+      setError('No tienes una sesión válida para restablecer la contraseña')
+      return
+    }
 
     if (password !== confirmPassword) {
       setError('Las contraseñas no coinciden')
@@ -46,6 +87,14 @@ function ResetPasswordForm() {
     setLoading(true)
 
     try {
+      // Verify we still have a valid session
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        setError('Tu sesión ha expirado. Por favor solicita un nuevo enlace de recuperación.')
+        setIsValidToken(false)
+        return
+      }
+
       const { error: updateError } = await supabase.auth.updateUser({
         password: password,
       })
@@ -57,6 +106,9 @@ function ResetPasswordForm() {
 
       toast.success('Contraseña actualizada exitosamente')
       setSuccess(true)
+      
+      // Sign out after password reset for security
+      await supabase.auth.signOut()
       
       setTimeout(() => {
         router.push('/login')

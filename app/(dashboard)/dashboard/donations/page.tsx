@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useDonations } from '@/lib/hooks/use-donations'
 import { useCategories } from '@/lib/hooks/use-categories'
@@ -14,6 +15,7 @@ import { formatDate } from '@/lib/utils/format'
 import { DonationStatus } from '@/lib/types/database.types'
 
 export default function DonationsPage() {
+  const searchParams = useSearchParams()
   const [view, setView] = useState<'grid' | 'list'>('grid')
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<DonationStatus | 'all'>('all')
@@ -22,6 +24,15 @@ export default function DonationsPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [donationToDelete, setDonationToDelete] = useState<string | null>(null)
   const itemsPerPage = 12
+
+  // Initialize from URL params
+  useEffect(() => {
+    const search = searchParams.get('search')
+    if (search) {
+      setSearchTerm(search)
+      setCurrentPage(1) // Reset to first page when search changes
+    }
+  }, [searchParams])
 
   const { donations, loading, total, deleteDonation } = useDonations({
     status: filterStatus !== 'all' ? filterStatus : undefined,
@@ -206,7 +217,7 @@ export default function DonationsPage() {
                     value={searchTerm}
                     onChange={(e) => {
                       setSearchTerm(e.target.value)
-                      setCurrentPage(1)
+                      setCurrentPage(1) // Reset pagination when search changes
                     }}
                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     placeholder="Buscar donaciones..."
@@ -220,7 +231,7 @@ export default function DonationsPage() {
                   value={filterStatus}
                   onChange={(e) => {
                     setFilterStatus(e.target.value as DonationStatus | 'all')
-                    setCurrentPage(1)
+                    setCurrentPage(1) // Reset pagination when filter changes
                   }}
                   className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                 >
@@ -233,7 +244,7 @@ export default function DonationsPage() {
                   value={filterCategory}
                   onChange={(e) => {
                     setFilterCategory(e.target.value)
-                    setCurrentPage(1)
+                    setCurrentPage(1) // Reset pagination when filter changes
                   }}
                   className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                 >

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useDonations } from '@/lib/hooks/use-donations'
 import { useCategories } from '@/lib/hooks/use-categories'
@@ -55,15 +56,15 @@ export default function NewDonationPage() {
         donor_id: profile.id,
         title: formData.title,
         description: formData.description,
-        category_id: formData.category_id || null,
-        center_id: formData.center_id || null,
+        category_id: formData.category_id || undefined,
+        center_id: formData.center_id || undefined,
         quantity: formData.quantity,
         condition: formData.condition,
         status: formData.status,
         is_urgent: formData.is_urgent,
-        images: images,
+        images: images.length > 0 ? images : undefined,
         pickup_address: formData.pickup_address,
-        tags: formData.tags,
+        tags: formData.tags.length > 0 ? formData.tags : undefined,
       })
 
       router.push('/dashboard/donations')
@@ -247,7 +248,7 @@ export default function NewDonationPage() {
                   <div className="grid grid-cols-4 gap-4">
                     {images.map((img, index) => (
                       <div key={index} className="relative">
-                        <img src={img} alt={`Preview ${index + 1}`} className="w-full h-24 object-cover rounded-lg" />
+                        <Image src={img} alt={`Preview ${index + 1}`} width={96} height={96} className="w-full h-24 object-cover rounded-lg" />
                         <button
                           type="button"
                           onClick={() => removeImage(index)}

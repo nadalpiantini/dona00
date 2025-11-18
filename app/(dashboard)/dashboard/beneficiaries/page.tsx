@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useBeneficiaries } from '@/lib/hooks/use-beneficiaries'
 import { useStats } from '@/lib/hooks/use-stats'
 import {
@@ -33,10 +34,13 @@ export default function BeneficiariesPage() {
                 Gestiona los beneficiarios registrados en la plataforma
               </p>
             </div>
-            <button className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+            <Link
+              href="/dashboard/beneficiaries/new"
+              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Nuevo Beneficiario
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -165,10 +169,13 @@ export default function BeneficiariesPage() {
                 : 'Comienza registrando tu primer beneficiario'}
             </p>
             {!searchTerm && filterVerified === 'all' && (
-              <button className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+              <Link
+                href="/dashboard/beneficiaries/new"
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Nuevo Beneficiario
-              </button>
+              </Link>
             )}
           </div>
         )}
@@ -223,12 +230,18 @@ export default function BeneficiariesPage() {
 
                   <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <button className="p-1.5 text-gray-400 hover:text-blue-600">
+                      <Link
+                        href={`/dashboard/beneficiaries/${beneficiary.id}`}
+                        className="p-1.5 text-gray-400 hover:text-blue-600"
+                      >
                         <Eye className="h-4 w-4" />
-                      </button>
-                      <button className="p-1.5 text-gray-400 hover:text-blue-600">
+                      </Link>
+                      <Link
+                        href={`/dashboard/beneficiaries/${beneficiary.id}/edit`}
+                        className="p-1.5 text-gray-400 hover:text-blue-600"
+                      >
                         <Edit className="h-4 w-4" />
-                      </button>
+                      </Link>
                       {!beneficiary.is_verified && (
                         <button
                           onClick={() => verifyBeneficiary(beneficiary.id)}

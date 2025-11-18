@@ -148,7 +148,7 @@ export default function DashboardLayout({
 
           <div className="flex-1 px-4 flex justify-between">
             <div className="flex-1 flex">
-              <form className="w-full flex md:ml-0" action="#" method="GET">
+              <div className="w-full flex md:ml-0">
                 <label htmlFor="search-field" className="sr-only">
                   Buscar
                 </label>
@@ -162,9 +162,19 @@ export default function DashboardLayout({
                     placeholder="Buscar donaciones, beneficiarios..."
                     type="search"
                     name="search"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        const searchTerm = (e.target as HTMLInputElement).value
+                        if (searchTerm.trim()) {
+                          // Navigate to donations page with search
+                          window.location.href = `/dashboard/donations?search=${encodeURIComponent(searchTerm)}`
+                        }
+                      }
+                    }}
                   />
                 </div>
-              </form>
+              </div>
             </div>
 
             <div className="ml-4 flex items-center md:ml-6">
@@ -196,32 +206,38 @@ export default function DashboardLayout({
                 </button>
 
                 {userMenuOpen && (
-                  <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
-                    <Link
-                      href="/dashboard/profile"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  <>
+                    <div
+                      className="fixed inset-0 z-10"
                       onClick={() => setUserMenuOpen(false)}
-                    >
-                      Mi Perfil
-                    </Link>
-                    <Link
-                      href="/dashboard/settings"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => setUserMenuOpen(false)}
-                    >
-                      Configuración
-                    </Link>
-                    <hr className="my-1" />
-                    <button
-                      onClick={() => {
-                        setUserMenuOpen(false)
-                        signOut()
-                      }}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Cerrar Sesión
-                    </button>
-                  </div>
+                    />
+                    <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-20">
+                      <Link
+                        href="/dashboard/profile"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        Mi Perfil
+                      </Link>
+                      <Link
+                        href="/dashboard/settings"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        Configuración
+                      </Link>
+                      <hr className="my-1" />
+                      <button
+                        onClick={() => {
+                          setUserMenuOpen(false)
+                          signOut()
+                        }}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        Cerrar Sesión
+                      </button>
+                    </div>
+                  </>
                 )}
               </div>
             </div>

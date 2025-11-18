@@ -137,7 +137,10 @@ export default function ReportsPage() {
   }
 
   const handleExport = (format: 'pdf' | 'excel' | 'csv') => {
-    console.log(`Exporting report as ${format}`)
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Exporting report as ${format}`)
+    }
+    // TODO: Implement actual export functionality
   }
 
   const renderLineChart = (data: any[]) => {

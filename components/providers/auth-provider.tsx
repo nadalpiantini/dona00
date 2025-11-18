@@ -38,10 +38,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!error && data) {
         setProfile(data)
       } else if (error) {
-        console.error('Error fetching profile:', error)
+        // Only log in development, and only if it's not a "not found" error (which is normal for new users)
+        if (process.env.NODE_ENV === 'development' && error.code !== 'PGRST116') {
+          console.error('Error fetching profile:', error)
+        }
       }
     } catch (err) {
-      console.error('Error fetching profile:', err)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error fetching profile:', err)
+      }
     }
   }, [supabase])
 
@@ -53,8 +58,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { data: { user }, error } = await supabase.auth.getUser()
         if (!mounted) return
 
+        // AuthSessionMissingError is normal when user is not logged in
+        // Only log actual errors, not missing session errors
         if (error) {
-          console.error('Error getting user:', error)
+          // Check if it's a session missing error (normal state)
+          const isSessionMissing = error.message?.includes('session') || 
+                                   error.message?.includes('Session') ||
+                                   error.name === 'AuthSessionMissingError'
+          
+          if (!isSessionMissing) {
+            // Only log non-session errors
+            if (process.env.NODE_ENV === 'development') {
+              console.error('Error getting user:', error)
+            }
+          }
+          // Set user to null and stop loading regardless of error type
+          setUser(null)
           setLoading(false)
           return
         }
@@ -65,7 +84,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (err) {
         if (!mounted) return
-        console.error('Error in getUser:', err)
+        // Check if it's a session missing error
+        const error = err as Error
+        const isSessionMissing = error.message?.includes('session') || 
+                                 error.message?.includes('Session') ||
+                                 error.name === 'AuthSessionMissingError'
+        
+        if (!isSessionMissing && process.env.NODE_ENV === 'development') {
+          console.error('Error in getUser:', err)
+        }
+        // Set user to null on any error
+        setUser(null)
       } finally {
         if (mounted) {
           setLoading(false)
@@ -111,36 +140,92 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signUp = async (email: string, password: string, fullName: string, phone?: string) => {
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-    })
+    try {
+      // Step 1: Create auth user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+      })
 
-    if (authError) {
-      toast.error(authError.message || 'Error al crear la cuenta')
-      throw authError
-    }
-
-    if (authData.user) {
-      // Create user profile
-      const { error: profileError } = await supabase
-        .from('dona_users')
-        .insert({
-          id: authData.user.id,
-          email,
-          full_name: fullName,
-          phone: phone || null,
-          role: 'donor',
-        })
-
-      if (profileError) {
-        toast.error('Error al crear el perfil de usuario')
-        throw profileError
+      if (authError) {
+        // Check if it's a 401 or network error
+        const errorMessage = authError.message || 'Error al crear la cuenta'
+        
+        // Log detailed error in development
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Signup auth error:', {
+            message: authError.message,
+            status: authError.status,
+            name: authError.name,
+          })
+        }
+        
+        toast.error(errorMessage)
+        throw authError
       }
-    }
 
-    toast.success('¡Cuenta creada exitosamente!')
-    router.push('/dashboard')
+      // Step 2: Create user profile if user was created
+      if (authData.user) {
+        // Wait a bit to ensure session is established
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
+        // Get current session to ensure we have auth context
+        const { data: { session } } = await supabase.auth.getSession()
+        
+        if (!session && process.env.NODE_ENV === 'development') {
+          console.warn('No session after signup, user may need email confirmation')
+        }
+
+        // Create user profile
+        const { data: profileData, error: profileError } = await supabase
+          .from('dona_users')
+          .insert({
+            id: authData.user.id,
+            email,
+            full_name: fullName,
+            phone: phone || null,
+            role: 'donor',
+          })
+          .select()
+          .single()
+
+        if (profileError) {
+          // Log detailed error
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Profile creation error:', {
+              message: profileError.message,
+              code: profileError.code,
+              details: profileError.details,
+              hint: profileError.hint,
+            })
+          }
+          
+          // If profile creation fails, try to clean up auth user
+          // (Note: We can't delete auth users from client, but we log it)
+          const errorMessage = profileError.message || 'Error al crear el perfil de usuario'
+          toast.error(errorMessage)
+          throw profileError
+        }
+
+        // Update local state if profile was created
+        if (profileData) {
+          setProfile(profileData)
+        }
+      }
+
+      // Check if email confirmation is required
+      if (authData.user && !authData.session) {
+        toast.success('¡Cuenta creada! Por favor verifica tu correo electrónico para activar tu cuenta.')
+        router.push('/login')
+        return
+      }
+
+      toast.success('¡Cuenta creada exitosamente!')
+      router.push('/dashboard')
+    } catch (err) {
+      // Re-throw to let caller handle it
+      throw err
+    }
   }
 
   const signOut = async () => {

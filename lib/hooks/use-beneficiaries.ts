@@ -17,6 +17,7 @@ export function useBeneficiaries(filters?: {
 
   useEffect(() => {
     loadBeneficiaries()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters?.search, filters?.verified, filters?.organizationId])
 
   const loadBeneficiaries = async () => {

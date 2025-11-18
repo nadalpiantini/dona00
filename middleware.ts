@@ -71,7 +71,18 @@ export async function middleware(request: NextRequest) {
   const isAuthPath = authPaths.some(p => path.startsWith(p))
 
   // Get user (this also refreshes session if expired)
-  const { data: { user } } = await supabase.auth.getUser()
+  // Silently handle session errors - they're normal when user is not logged in
+  let user = null
+  try {
+    const { data, error } = await supabase.auth.getUser()
+    if (!error) {
+      user = data.user
+    }
+    // Ignore session missing errors - they're expected when not logged in
+  } catch (err) {
+    // Silently ignore auth errors in middleware
+    // They're normal when user is not authenticated
+  }
 
   // Redirect to login if accessing protected route without auth
   // Only disable in development if explicitly needed

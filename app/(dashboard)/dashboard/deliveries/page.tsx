@@ -256,13 +256,13 @@ export default function DeliveriesPage() {
                         <div className="flex items-center space-x-2">
                           {delivery.status === 'pending' && (
                             <button
-                              onClick={() => handleStatusUpdate(delivery.id, 'scheduled')}
+                              onClick={() => handleStatusUpdate(delivery.id, 'accepted')}
                               className="text-xs px-3 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200"
                             >
                               Programar
                             </button>
                           )}
-                          {delivery.status === 'scheduled' && (
+                          {delivery.status === 'accepted' && (
                             <button
                               onClick={() => handleStatusUpdate(delivery.id, 'in_transit')}
                               className="text-xs px-3 py-1 bg-yellow-100 text-yellow-700 rounded-md hover:bg-yellow-200"
