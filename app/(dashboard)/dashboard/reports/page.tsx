@@ -505,19 +505,19 @@ export default function ReportsPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-blue-50 rounded-lg p-4">
                   <p className="text-sm text-gray-700">
-                    &ldquo;Gracias a DONA+ pudimos equipar completamente nuestra escuela con materiales educativos.&rdquo;
+                    &quot;Gracias a DONA+ pudimos equipar completamente nuestra escuela con materiales educativos.&quot;
                   </p>
                   <p className="text-xs text-gray-500 mt-2">- Centro Educativo Esperanza</p>
                 </div>
                 <div className="bg-green-50 rounded-lg p-4">
                   <p className="text-sm text-gray-700">
-                    &ldquo;Las donaciones de alimentos han sido vitales para nuestras 25 familias residentes.&rdquo;
+                    &quot;Las donaciones de alimentos han sido vitales para nuestras 25 familias residentes.&quot;
                   </p>
                   <p className="text-xs text-gray-500 mt-2">- Hogar Santa Ana</p>
                 </div>
                 <div className="bg-purple-50 rounded-lg p-4">
                   <p className="text-sm text-gray-700">
-                    &ldquo;La plataforma nos permite conectar donantes con necesitados de manera eficiente.&rdquo;
+                    &quot;La plataforma nos permite conectar donantes con necesitados de manera eficiente.&quot;
                   </p>
                   <p className="text-xs text-gray-500 mt-2">- Voluntarios San José</p>
                 </div>

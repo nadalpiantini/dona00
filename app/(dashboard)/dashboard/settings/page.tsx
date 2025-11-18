@@ -4,11 +4,11 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { useAuth } from '@/components/providers/auth-provider'
 import {
-  User, Bell, Shield, Palette, Globe, CreditCard, Users,
-  Mail, Phone, MapPin, Camera, Save, Check, X, AlertCircle,
-  Key, Smartphone, Monitor, Moon, Sun, ChevronRight,
-  Package, Truck, Heart, FileText, Download, Upload,
-  HelpCircle, ExternalLink, ToggleLeft, ToggleRight,
+  User, Bell, Shield, Palette, CreditCard, Users,
+  Mail, Phone, Camera, Save, Check,
+  Key, Smartphone, Monitor, Moon, Sun,
+  Package, FileText, Download, Upload,
+  HelpCircle,
   Calendar, RefreshCw
 } from 'lucide-react'
 
