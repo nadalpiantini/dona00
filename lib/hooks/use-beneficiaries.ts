@@ -51,7 +51,7 @@ export function useBeneficiaries(filters?: {
       if (queryError) throw queryError
 
       setBeneficiaries(data || [])
-    } catch (err) {
+    } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error('Unknown error')
       setError(error.message)
       toast.error('Error al cargar beneficiarios')
@@ -79,7 +79,7 @@ export function useBeneficiaries(filters?: {
       toast.success('Beneficiario creado exitosamente')
       await loadBeneficiaries()
       return data
-    } catch (err) {
+    } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error('Unknown error')
       toast.error(error.message || 'Error al crear el beneficiario')
       throw err
@@ -103,7 +103,7 @@ export function useBeneficiaries(filters?: {
       toast.success('Beneficiario actualizado exitosamente')
       await loadBeneficiaries()
       return data
-    } catch (err) {
+    } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error('Unknown error')
       toast.error(error.message || 'Error al actualizar el beneficiario')
       throw err

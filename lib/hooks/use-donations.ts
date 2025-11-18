@@ -61,7 +61,7 @@ export function useDonations(filters?: {
 
       setDonations(data || [])
       setTotal(count || 0)
-    } catch (err) {
+    } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error('Unknown error')
       setError(error.message)
       toast.error('Error al cargar donaciones')
@@ -93,7 +93,7 @@ export function useDonations(filters?: {
       toast.success('Donación creada exitosamente')
       await loadDonations()
       return data
-    } catch (err) {
+    } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error('Unknown error')
       toast.error(error.message || 'Error al crear la donación')
       throw err
@@ -120,7 +120,7 @@ export function useDonations(filters?: {
       toast.success('Donación actualizada exitosamente')
       await loadDonations()
       return data
-    } catch (err) {
+    } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error('Unknown error')
       toast.error(error.message || 'Error al actualizar la donación')
       throw err
@@ -138,7 +138,7 @@ export function useDonations(filters?: {
 
       toast.success('Donación eliminada exitosamente')
       await loadDonations()
-    } catch (err) {
+    } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error('Unknown error')
       toast.error(error.message || 'Error al eliminar la donación')
       throw err

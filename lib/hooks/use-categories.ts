@@ -24,7 +24,7 @@ export function useCategories() {
       if (queryError) throw queryError
 
       setCategories(data || [])
-    } catch (err) {
+    } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error('Unknown error')
       setError(error.message)
     } finally {

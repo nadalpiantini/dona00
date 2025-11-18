@@ -12,8 +12,8 @@ export interface Organization {
   website?: string
   phone?: string
   email: string
-  address?: any
-  settings?: any
+  address?: Record<string, unknown>
+  settings?: Record<string, unknown>
   subscription_plan?: string
   subscription_expires_at?: string
   is_active?: boolean
@@ -30,8 +30,8 @@ export interface User {
   role: UserRole
   organization_id?: string
   organization?: Organization
-  address?: any
-  preferences?: any
+  address?: Record<string, unknown>
+  preferences?: Record<string, unknown>
   is_active?: boolean
   is_verified?: boolean
   verified_at?: string
@@ -46,12 +46,12 @@ export interface Center {
   organization?: Organization
   name: string
   description?: string
-  address: any
-  coordinates?: any
+  address: Record<string, unknown>
+  coordinates?: { lat: number; lng: number } | null
   phone?: string
   email?: string
-  operating_hours?: any
-  capacity_info?: any
+  operating_hours?: Record<string, unknown>
+  capacity_info?: Record<string, unknown>
   accepted_items?: string[]
   status?: CenterStatus
   manager_id?: string
@@ -89,9 +89,9 @@ export interface Donation {
   quantity?: number
   condition?: 'new' | 'like_new' | 'good' | 'fair'
   images?: string[]
-  pickup_address?: any
-  pickup_coordinates?: any
-  availability_schedule?: any
+  pickup_address?: Record<string, unknown>
+  pickup_coordinates?: { lat: number; lng: number } | null
+  availability_schedule?: Record<string, unknown>
   status?: DonationStatus
   beneficiary_id?: string
   beneficiary?: User
@@ -101,7 +101,7 @@ export interface Donation {
   is_featured?: boolean
   views_count?: number
   tags?: string[]
-  metadata?: any
+  metadata?: Record<string, unknown>
   created_at?: string
   updated_at?: string
 }
@@ -116,10 +116,10 @@ export interface Delivery {
   driver?: User
   beneficiary_id: string
   beneficiary?: User
-  pickup_address: any
-  delivery_address: any
-  pickup_coordinates?: any
-  delivery_coordinates?: any
+  pickup_address: Record<string, unknown>
+  delivery_address: Record<string, unknown>
+  pickup_coordinates?: { lat: number; lng: number } | null
+  delivery_coordinates?: { lat: number; lng: number } | null
   scheduled_pickup_at?: string
   actual_pickup_at?: string
   scheduled_delivery_at?: string
@@ -129,11 +129,11 @@ export interface Delivery {
   payment_status?: string
   payment_method?: string
   tracking_number?: string
-  tracking_updates?: any[]
+  tracking_updates?: Array<Record<string, unknown>>
   driver_notes?: string
   beneficiary_rating?: number
   beneficiary_feedback?: string
-  proof_of_delivery?: any
+  proof_of_delivery?: Record<string, unknown>
   created_at?: string
   updated_at?: string
 }
@@ -159,7 +159,7 @@ export interface Message {
   sender_id: string
   sender?: User
   content: string
-  attachments?: any[]
+  attachments?: Array<Record<string, unknown> | string>
   is_read?: boolean
   read_at?: string
   is_edited?: boolean
