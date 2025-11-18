@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Category } from '@/lib/types/database.types'
 
@@ -10,7 +10,7 @@ export function useCategories() {
   const [error, setError] = useState<string | null>(null)
   const supabase = createClient()
 
-  const loadCategories = async () => {
+  const loadCategories = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -30,7 +30,7 @@ export function useCategories() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
 
   useEffect(() => {
     loadCategories()
