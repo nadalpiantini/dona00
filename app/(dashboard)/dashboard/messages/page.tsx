@@ -1,11 +1,10 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { useAuth } from '@/components/providers/auth-provider'
 import {
-  Search, Send, Plus, Paperclip, Smile, MoreVertical,
-  Check, CheckCheck, Clock, Archive, Star, Trash2,
-  Phone, Video, Info, Bell, BellOff, Filter, Download,
+  Search, Send, Plus, Paperclip, Smile,
+  Check, CheckCheck, Clock, Archive, Star,
+  Phone, Video, Info, Bell, BellOff, Download,
   Image as ImageIcon, File, MapPin, Users, Package
 } from 'lucide-react'
 
@@ -40,7 +39,6 @@ type Message = {
 }
 
 export default function MessagesPage() {
-  const { profile } = useAuth()
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null)
   const [messages, setMessages] = useState<Message[]>([])

@@ -4,8 +4,8 @@ import { useState } from 'react'
 import { useBeneficiaries } from '@/lib/hooks/use-beneficiaries'
 import { useStats } from '@/lib/hooks/use-stats'
 import {
-  Search, Plus, Users, MapPin, Phone, Mail, Calendar,
-  CheckCircle, Clock, AlertTriangle, Edit, Trash2, Eye,
+  Search, Plus, Users, MapPin, Phone, Calendar,
+  CheckCircle, Clock, Edit, Eye,
   Loader2, Shield
 } from 'lucide-react'
 import { formatDate } from '@/lib/utils/format'
@@ -14,7 +14,7 @@ export default function BeneficiariesPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterVerified, setFilterVerified] = useState<boolean | 'all'>('all')
 
-  const { beneficiaries, loading, verifyBeneficiary, refresh } = useBeneficiaries({
+  const { beneficiaries, loading, verifyBeneficiary } = useBeneficiaries({
     search: searchTerm || undefined,
     verified: filterVerified !== 'all' ? filterVerified : undefined,
   })

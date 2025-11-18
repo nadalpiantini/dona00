@@ -2,6 +2,14 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('Missing Supabase environment variables in middleware')
+    return NextResponse.next()
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -9,8 +17,8 @@ export async function middleware(request: NextRequest) {
   })
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         get(name: string) {
@@ -54,9 +62,6 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Refresh session if expired
-  await supabase.auth.getSession()
-
   // Protected routes
   const protectedPaths = ['/dashboard', '/admin', '/profile', '/donations/new']
   const authPaths = ['/login', '/signup', '/auth']
@@ -65,6 +70,7 @@ export async function middleware(request: NextRequest) {
   const isProtectedPath = protectedPaths.some(p => path.startsWith(p))
   const isAuthPath = authPaths.some(p => path.startsWith(p))
 
+  // Get user (this also refreshes session if expired)
   const { data: { user } } = await supabase.auth.getUser()
 
   // Redirect to login if accessing protected route without auth

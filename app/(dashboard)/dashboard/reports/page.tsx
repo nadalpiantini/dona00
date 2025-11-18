@@ -1,19 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useAuth } from '@/components/providers/auth-provider'
+import { useState } from 'react'
 import {
-  TrendingUp, TrendingDown, Users, Package, Truck, MapPin,
-  Calendar, Download, Filter, RefreshCw, ChevronUp, ChevronDown,
-  Heart, DollarSign, Clock, Award, Target, Activity,
-  PieChart, BarChart3, LineChart, Map, FileText, Share2
+  TrendingUp, Users, Package, Truck,
+  Calendar, Download, RefreshCw, ChevronUp, ChevronDown,
+  DollarSign, Clock, Award,
+  FileText, Share2
 } from 'lucide-react'
 
 type TimeRange = 'week' | 'month' | 'quarter' | 'year' | 'custom'
 type ChartType = 'line' | 'bar' | 'pie' | 'area'
 
 export default function ReportsPage() {
-  const { profile } = useAuth()
   const [timeRange, setTimeRange] = useState<TimeRange>('month')
   const [selectedMetric, setSelectedMetric] = useState('donations')
   const [compareMode, setCompareMode] = useState(false)

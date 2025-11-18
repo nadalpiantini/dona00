@@ -5,7 +5,7 @@ import { useDeliveries } from '@/lib/hooks/use-deliveries'
 import { useStats } from '@/lib/hooks/use-stats'
 import {
   Truck, Search, Package, MapPin, Clock, User,
-  Phone, Calendar, CheckCircle, XCircle, AlertCircle,
+  Calendar, CheckCircle, XCircle, AlertCircle,
   ChevronRight, Loader2
 } from 'lucide-react'
 import { DeliveryStatus } from '@/lib/types/database.types'
@@ -15,7 +15,7 @@ export default function DeliveriesPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<DeliveryStatus | 'all'>('all')
 
-  const { deliveries, loading, updateDeliveryStatus, refresh } = useDeliveries({
+  const { deliveries, loading, updateDeliveryStatus } = useDeliveries({
     status: filterStatus !== 'all' ? filterStatus : undefined,
     search: searchTerm || undefined,
   })
@@ -33,7 +33,7 @@ export default function DeliveriesPage() {
   }
 
   const getStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { label: string; class: string; icon: any }> = {
+    const statusConfig: Record<string, { label: string; class: string; icon: React.ComponentType<{ className?: string }> }> = {
       pending: { label: 'Pendiente', class: 'bg-gray-100 text-gray-800', icon: Clock },
       scheduled: { label: 'Programada', class: 'bg-blue-100 text-blue-800', icon: Calendar },
       in_transit: { label: 'En Tránsito', class: 'bg-yellow-100 text-yellow-800', icon: Truck },
@@ -56,7 +56,7 @@ export default function DeliveriesPage() {
   const handleStatusUpdate = async (id: string, newStatus: DeliveryStatus) => {
     try {
       await updateDeliveryStatus(id, newStatus)
-    } catch (err) {
+    } catch {
       // Error already handled in hook
     }
   }

@@ -1,13 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { useAuth } from '@/components/providers/auth-provider'
 import { useStats } from '@/lib/hooks/use-stats'
 import { useDonations } from '@/lib/hooks/use-donations'
 import { useDeliveries } from '@/lib/hooks/use-deliveries'
 import {
-  Package, Users, Truck, MapPin, TrendingUp, TrendingDown,
-  Heart, Clock, CheckCircle, AlertCircle, ChevronRight, Calendar, Loader2
+  Package, Users, Truck, MapPin, TrendingUp,
+  Heart, ChevronRight, Calendar, Loader2
 } from 'lucide-react'
 import Link from 'next/link'
 import { formatDate } from '@/lib/utils/format'

@@ -1,21 +1,19 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { useDonations } from '@/lib/hooks/use-donations'
 import { useCategories } from '@/lib/hooks/use-categories'
 import { useStats } from '@/lib/hooks/use-stats'
-import { useAuth } from '@/components/providers/auth-provider'
 import {
   Package, Plus, Search, Eye, Edit2, Trash2, Heart,
-  Calendar, MapPin, Users, Grid, List, Download, Upload,
-  Share2, AlertCircle, Loader2
+  Calendar, MapPin, Users, Grid, List, Download,
+  AlertCircle, Loader2
 } from 'lucide-react'
 import { formatDate } from '@/lib/utils/format'
 import { DonationStatus } from '@/lib/types/database.types'
 
 export default function DonationsPage() {
-  const { profile } = useAuth()
   const [view, setView] = useState<'grid' | 'list'>('grid')
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<DonationStatus | 'all'>('all')
@@ -25,7 +23,7 @@ export default function DonationsPage() {
   const [donationToDelete, setDonationToDelete] = useState<string | null>(null)
   const itemsPerPage = 12
 
-  const { donations, loading, total, deleteDonation, refresh } = useDonations({
+  const { donations, loading, total, deleteDonation } = useDonations({
     status: filterStatus !== 'all' ? filterStatus : undefined,
     categoryId: filterCategory !== 'all' ? filterCategory : undefined,
     search: searchTerm || undefined,
@@ -86,7 +84,7 @@ export default function DonationsPage() {
         await deleteDonation(donationToDelete)
         setShowDeleteModal(false)
         setDonationToDelete(null)
-      } catch (err) {
+      } catch {
         // Error already handled in hook
       }
     }

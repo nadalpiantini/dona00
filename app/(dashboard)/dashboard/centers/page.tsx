@@ -13,11 +13,10 @@ import { CenterStatus } from '@/lib/types/database.types'
 export default function CentersPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<CenterStatus | 'all'>('all')
-  const [selectedCenter, setSelectedCenter] = useState<string | null>(null)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [centerToDelete, setCenterToDelete] = useState<string | null>(null)
 
-  const { centers, loading, deleteCenter, refresh } = useCenters({
+  const { centers, loading, deleteCenter } = useCenters({
     status: filterStatus !== 'all' ? filterStatus : undefined,
     search: searchTerm || undefined,
   })
@@ -35,7 +34,7 @@ export default function CentersPage() {
         await deleteCenter(centerToDelete)
         setShowDeleteModal(false)
         setCenterToDelete(null)
-      } catch (err) {
+      } catch {
         // Error already handled in hook
       }
     }
@@ -50,7 +49,7 @@ export default function CentersPage() {
   }
 
   const getStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { label: string; class: string; icon: any }> = {
+    const statusConfig: Record<string, { label: string; class: string; icon: React.ComponentType<{ className?: string }> }> = {
       active: { label: 'Activo', class: 'bg-green-100 text-green-800', icon: CheckCircle },
       accepting: { label: 'Aceptando', class: 'bg-blue-100 text-blue-800', icon: Package },
       full: { label: 'Lleno', class: 'bg-yellow-100 text-yellow-800', icon: AlertCircle },

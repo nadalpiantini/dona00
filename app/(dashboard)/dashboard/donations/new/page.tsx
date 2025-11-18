@@ -67,7 +67,7 @@ export default function NewDonationPage() {
       })
 
       router.push('/dashboard/donations')
-    } catch (err: any) {
+    } catch {
       // Error already handled by toast in hook
     } finally {
       setLoading(false)
@@ -192,7 +192,7 @@ export default function NewDonationPage() {
                       id="condition"
                       required
                       value={formData.condition}
-                      onChange={(e) => setFormData({ ...formData, condition: e.target.value as any })}
+                      onChange={(e) => setFormData({ ...formData, condition: e.target.value as 'new' | 'like_new' | 'good' | 'fair' })}
                       className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     >
                       <option value="new">Nuevo</option>

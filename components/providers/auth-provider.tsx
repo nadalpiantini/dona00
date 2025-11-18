@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { User as SupabaseUser } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 import { User } from '@/lib/types/database.types'
@@ -27,20 +27,58 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const supabase = createClient()
 
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
-      if (user) {
-        await fetchProfile(user.id)
+  const fetchProfile = useCallback(async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('dona_users')
+        .select('*, organization:dona_organizations(*)')
+        .eq('id', userId)
+        .single()
+
+      if (!error && data) {
+        setProfile(data)
+      } else if (error) {
+        console.error('Error fetching profile:', error)
       }
-      setLoading(false)
+    } catch (err) {
+      console.error('Error fetching profile:', err)
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    let mounted = true
+
+    const getUser = async () => {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser()
+        if (!mounted) return
+
+        if (error) {
+          console.error('Error getting user:', error)
+          setLoading(false)
+          return
+        }
+
+        setUser(user)
+        if (user) {
+          await fetchProfile(user.id)
+        }
+      } catch (err) {
+        if (!mounted) return
+        console.error('Error in getUser:', err)
+      } finally {
+        if (mounted) {
+          setLoading(false)
+        }
+      }
     }
 
     getUser()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return
+
         setUser(session?.user ?? null)
         if (session?.user) {
           await fetchProfile(session.user.id)
@@ -52,21 +90,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     )
 
     return () => {
+      mounted = false
       subscription.unsubscribe()
     }
-  }, [])
-
-  const fetchProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('dona_users')
-      .select('*, organization:dona_organizations(*)')
-      .eq('id', userId)
-      .single()
-
-    if (!error && data) {
-      setProfile(data)
-    }
-  }
+  }, [supabase, fetchProfile])
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
