@@ -12,7 +12,9 @@ export interface Organization {
   website?: string
   phone?: string
   email: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   address?: Record<string, unknown>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   settings?: Record<string, unknown>
   subscription_plan?: string
   subscription_expires_at?: string
@@ -30,7 +32,9 @@ export interface User {
   role: UserRole
   organization_id?: string
   organization?: Organization
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   address?: Record<string, unknown>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   preferences?: Record<string, unknown>
   is_active?: boolean
   is_verified?: boolean
@@ -46,11 +50,14 @@ export interface Center {
   organization?: Organization
   name: string
   description?: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   address: Record<string, unknown>
   coordinates?: { lat: number; lng: number } | null
   phone?: string
   email?: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   operating_hours?: Record<string, unknown>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   capacity_info?: Record<string, unknown>
   accepted_items?: string[]
   status?: CenterStatus
@@ -89,8 +96,10 @@ export interface Donation {
   quantity?: number
   condition?: 'new' | 'like_new' | 'good' | 'fair'
   images?: string[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pickup_address?: Record<string, unknown>
   pickup_coordinates?: { lat: number; lng: number } | null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   availability_schedule?: Record<string, unknown>
   status?: DonationStatus
   beneficiary_id?: string
@@ -101,6 +110,7 @@ export interface Donation {
   is_featured?: boolean
   views_count?: number
   tags?: string[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Record<string, unknown>
   created_at?: string
   updated_at?: string
@@ -116,7 +126,9 @@ export interface Delivery {
   driver?: User
   beneficiary_id: string
   beneficiary?: User
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pickup_address: Record<string, unknown>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   delivery_address: Record<string, unknown>
   pickup_coordinates?: { lat: number; lng: number } | null
   delivery_coordinates?: { lat: number; lng: number } | null
@@ -129,10 +141,12 @@ export interface Delivery {
   payment_status?: string
   payment_method?: string
   tracking_number?: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tracking_updates?: Array<Record<string, unknown>>
   driver_notes?: string
   beneficiary_rating?: number
   beneficiary_feedback?: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   proof_of_delivery?: Record<string, unknown>
   created_at?: string
   updated_at?: string
@@ -159,6 +173,7 @@ export interface Message {
   sender_id: string
   sender?: User
   content: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   attachments?: Array<Record<string, unknown> | string>
   is_read?: boolean
   read_at?: string

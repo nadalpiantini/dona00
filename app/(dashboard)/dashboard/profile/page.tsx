@@ -3,29 +3,38 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/components/providers/auth-provider'
-import { useRouter } from 'next/navigation'
 import {
   ArrowLeft, User, Mail, Phone, MapPin, Calendar,
   Save, Camera, Loader2, CheckCircle
 } from 'lucide-react'
-import toast from 'react-hot-toast'
 
 export default function ProfilePage() {
-  const router = useRouter()
   const { profile, updateProfile } = useAuth()
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
-  const [formData, setFormData] = useState({
+  type AddressType = {
+    street: string;
+    city: string;
+    province: string;
+    postal_code: string;
+  }
+
+  const [formData, setFormData] = useState<{
+    full_name: string;
+    email: string;
+    phone: string;
+    address: AddressType;
+  }>({
     full_name: profile?.full_name || '',
     email: profile?.email || '',
     phone: profile?.phone || '',
     address: typeof profile?.address === 'object' && profile.address
       ? {
-          street: profile.address.street || '',
-          city: profile.address.city || '',
-          province: profile.address.province || '',
-          postal_code: profile.address.postal_code || '',
+          street: (profile.address as AddressType).street || '',
+          city: (profile.address as AddressType).city || '',
+          province: (profile.address as AddressType).province || '',
+          postal_code: (profile.address as AddressType).postal_code || '',
         }
       : { street: '', city: '', province: '', postal_code: '' },
   })

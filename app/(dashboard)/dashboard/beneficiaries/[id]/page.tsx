@@ -41,8 +41,9 @@ export default function BeneficiaryDetailPage() {
         if (!data) throw new Error('Beneficiario no encontrado')
 
         setBeneficiary(data)
-      } catch (err: any) {
-        toast.error(err.message || 'Error al cargar el beneficiario')
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Error al cargar el beneficiario'
+        toast.error(errorMessage)
         router.push('/dashboard/beneficiaries')
       } finally {
         setLoading(false)
@@ -98,7 +99,7 @@ export default function BeneficiaryDetailPage() {
     ? beneficiary.organization
     : null
   const address = typeof beneficiary.address === 'object' && beneficiary.address
-    ? beneficiary.address
+    ? beneficiary.address as { street?: string; city?: string; province?: string; postal_code?: string }
     : null
 
   return (
@@ -194,8 +195,8 @@ export default function BeneficiaryDetailPage() {
                     {address.street && <p>{address.street}</p>}
                     <p>
                       {address.city}
-                      {address.province && `, ${address.province}`}
-                      {address.postal_code && ` ${address.postal_code}`}
+                      {address.province ? `, ${address.province}` : ''}
+                      {address.postal_code ? ` ${address.postal_code}` : ''}
                     </p>
                   </div>
                 </div>

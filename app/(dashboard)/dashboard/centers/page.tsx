@@ -224,10 +224,16 @@ export default function CentersPage() {
         {!loading && centers.length > 0 && (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {centers.map((center) => {
-              const address = typeof center.address === 'object' ? center.address : {}
-              const operatingHours = typeof center.operating_hours === 'object' ? center.operating_hours : {}
+              const address = typeof center.address === 'object' 
+                ? center.address as { street?: string; city?: string; province?: string; postal_code?: string }
+                : null
+              const operatingHours = typeof center.operating_hours === 'object' 
+                ? center.operating_hours as { monday_friday?: string; saturday?: string; sunday?: string }
+                : null
               const acceptedItems = Array.isArray(center.accepted_items) ? center.accepted_items : []
-              const capacityInfo = typeof center.capacity_info === 'object' ? center.capacity_info : {}
+              const capacityInfo = typeof center.capacity_info === 'object' 
+                ? center.capacity_info as { used?: number; total?: number; percentage?: number }
+                : { used: 0, total: 0, percentage: 0 }
               const capacityPercentage = capacityInfo.percentage || 0
 
               return (

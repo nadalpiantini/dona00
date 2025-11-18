@@ -254,11 +254,11 @@ export default function DonationDetailPage() {
                     <p>{donation.pickup_address}</p>
                   ) : (
                     <>
-                      {donation.pickup_address.street && <p>{donation.pickup_address.street}</p>}
+                      {(donation.pickup_address as { street?: string; city?: string; province?: string; postal_code?: string }).street && <p>{(donation.pickup_address as { street?: string; city?: string; province?: string; postal_code?: string }).street}</p>}
                       <p>
-                        {donation.pickup_address.city}
-                        {donation.pickup_address.province && `, ${donation.pickup_address.province}`}
-                        {donation.pickup_address.postal_code && ` ${donation.pickup_address.postal_code}`}
+                        {(donation.pickup_address as { street?: string; city?: string; province?: string; postal_code?: string }).city}
+                        {(donation.pickup_address as { street?: string; city?: string; province?: string; postal_code?: string }).province && `, ${(donation.pickup_address as { street?: string; city?: string; province?: string; postal_code?: string }).province}`}
+                        {(donation.pickup_address as { street?: string; city?: string; province?: string; postal_code?: string }).postal_code && ` ${(donation.pickup_address as { street?: string; city?: string; province?: string; postal_code?: string }).postal_code}`}
                       </p>
                     </>
                   )}

@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useCenters } from '@/lib/hooks/use-centers'
-import { ArrowLeft, Loader2, AlertCircle, Save, MapPin, Phone, Mail, Clock, Users } from 'lucide-react'
+import { ArrowLeft, Loader2, AlertCircle, Save, MapPin, Phone, Mail, Clock } from 'lucide-react'
 import { Center, CenterStatus } from '@/lib/types/database.types'
 import toast from 'react-hot-toast'
 
@@ -77,8 +77,9 @@ export default function EditCenterPage() {
             : { monday_friday: '', saturday: '', sunday: '' },
           accepted_items: Array.isArray(data.accepted_items) ? data.accepted_items : [],
         })
-      } catch (err: any) {
-        toast.error(err.message || 'Error al cargar el centro')
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Error al cargar el centro'
+        toast.error(errorMessage)
         router.push('/dashboard/centers')
       } finally {
         setLoading(false)

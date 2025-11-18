@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -15,7 +15,7 @@ import {
 import { formatDate } from '@/lib/utils/format'
 import { DonationStatus } from '@/lib/types/database.types'
 
-export default function DonationsPage() {
+function DonationsContent() {
   const searchParams = useSearchParams()
   const [view, setView] = useState<'grid' | 'list'>('grid')
   const [searchTerm, setSearchTerm] = useState('')
@@ -350,7 +350,7 @@ export default function DonationsPage() {
                             <span className="truncate max-w-[150px]">
                               {typeof donation.pickup_address === 'string' 
                                 ? donation.pickup_address 
-                                : donation.pickup_address.city || 'Ubicación'}
+                                : (donation.pickup_address as { city?: string }).city || 'Ubicación'}
                             </span>
                           </div>
                         )}
@@ -439,8 +439,8 @@ export default function DonationsPage() {
                                   <span className="flex items-center">
                                     <MapPin className="h-4 w-4 mr-1" />
                                     {typeof donation.pickup_address === 'string' 
-                                      ? donation.pickup_address 
-                                      : donation.pickup_address.city || 'Ubicación'}
+                                ? donation.pickup_address 
+                                : (donation.pickup_address as { city?: string }).city || 'Ubicación'}
                                   </span>
                                 )}
                                 <span>Cantidad: {donation.quantity || 1}</span>
@@ -608,5 +608,17 @@ export default function DonationsPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function DonationsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+      </div>
+    }>
+      <DonationsContent />
+    </Suspense>
   )
 }

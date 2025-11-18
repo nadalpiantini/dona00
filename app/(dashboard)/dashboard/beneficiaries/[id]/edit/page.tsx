@@ -60,8 +60,9 @@ export default function EditBeneficiaryPage() {
               }
             : { street: '', city: '', province: '', postal_code: '' },
         })
-      } catch (err: any) {
-        toast.error(err.message || 'Error al cargar el beneficiario')
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Error al cargar el beneficiario'
+        toast.error(errorMessage)
         router.push('/dashboard/beneficiaries')
       } finally {
         setLoading(false)

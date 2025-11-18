@@ -40,8 +40,9 @@ export default function CenterDetailPage() {
         if (!data) throw new Error('Centro no encontrado')
 
         setCenter(data)
-      } catch (err: any) {
-        toast.error(err.message || 'Error al cargar el centro')
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Error al cargar el centro'
+        toast.error(errorMessage)
         router.push('/dashboard/centers')
       } finally {
         setLoading(false)
@@ -63,8 +64,9 @@ export default function CenterDetailPage() {
       if (error) throw error
       toast.success('Centro eliminado exitosamente')
       router.push('/dashboard/centers')
-    } catch (err: any) {
-      toast.error(err.message || 'Error al eliminar el centro')
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al eliminar el centro'
+      toast.error(errorMessage)
     }
   }
 
@@ -120,10 +122,16 @@ export default function CenterDetailPage() {
   const manager = center.manager && typeof center.manager === 'object' && 'full_name' in center.manager
     ? center.manager
     : null
-  const address = typeof center.address === 'object' ? center.address : {}
-  const operatingHours = typeof center.operating_hours === 'object' ? center.operating_hours : {}
+  const address = typeof center.address === 'object' 
+    ? center.address as { street?: string; city?: string; province?: string; postal_code?: string }
+    : null
+  const operatingHours = typeof center.operating_hours === 'object' 
+    ? center.operating_hours as { monday_friday?: string; saturday?: string; sunday?: string }
+    : null
   const acceptedItems = Array.isArray(center.accepted_items) ? center.accepted_items : []
-  const capacityInfo = typeof center.capacity_info === 'object' ? center.capacity_info : {}
+  const capacityInfo = typeof center.capacity_info === 'object' 
+    ? center.capacity_info as { used?: number; total?: number; percentage?: number }
+    : { used: 0, total: 0, percentage: 0 }
   const capacityPercentage = capacityInfo.percentage || 0
 
   return (
