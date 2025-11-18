@@ -45,10 +45,10 @@ export default function SignupPage() {
     setLoading(true)
 
     try {
-      await signUp(formData.email, formData.password, formData.fullName)
+      await signUp(formData.email, formData.password, formData.fullName, formData.phone || undefined)
       router.push('/dashboard')
-    } catch (err: any) {
-      setError(err.message || 'Error al crear la cuenta. Por favor intenta de nuevo.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al crear la cuenta. Por favor intenta de nuevo.')
     } finally {
       setLoading(false)
     }

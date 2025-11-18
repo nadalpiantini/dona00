@@ -2,111 +2,95 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/components/providers/auth-provider'
+import { useStats } from '@/lib/hooks/use-stats'
+import { useDonations } from '@/lib/hooks/use-donations'
+import { useDeliveries } from '@/lib/hooks/use-deliveries'
 import {
   Package, Users, Truck, MapPin, TrendingUp, TrendingDown,
-  Heart, Clock, CheckCircle, AlertCircle, ChevronRight, Calendar
+  Heart, Clock, CheckCircle, AlertCircle, ChevronRight, Calendar, Loader2
 } from 'lucide-react'
 import Link from 'next/link'
+import { formatDate } from '@/lib/utils/format'
 
 export default function DashboardPage() {
   const { profile } = useAuth()
+  const { stats, loading: statsLoading } = useStats()
+  const { donations: recentDonationsData, loading: donationsLoading } = useDonations({ limit: 4 })
+  const { deliveries: upcomingDeliveriesData, loading: deliveriesLoading } = useDeliveries({ 
+    status: 'pending',
+    // Add more filters as needed
+  })
 
-  const stats = [
+  const statsCards = [
     {
       title: 'Total Donaciones',
-      value: '142',
+      value: stats.totalDonations.toString(),
       change: '+12%',
-      trend: 'up',
+      trend: 'up' as const,
       icon: Package,
       color: 'bg-blue-500',
     },
     {
       title: 'Beneficiarios Activos',
-      value: '89',
+      value: stats.totalBeneficiaries.toString(),
       change: '+5%',
-      trend: 'up',
+      trend: 'up' as const,
       icon: Users,
       color: 'bg-green-500',
     },
     {
       title: 'Entregas Completadas',
-      value: '67',
+      value: stats.deliveredDonations.toString(),
       change: '+18%',
-      trend: 'up',
+      trend: 'up' as const,
       icon: Truck,
       color: 'bg-purple-500',
     },
     {
       title: 'Centros de Acopio',
-      value: '12',
+      value: stats.totalCenters.toString(),
       change: '0%',
-      trend: 'neutral',
+      trend: 'neutral' as const,
       icon: MapPin,
       color: 'bg-orange-500',
     },
   ]
 
-  const recentDonations = [
-    {
-      id: 1,
-      title: 'Ropa de Niños',
-      donor: 'María González',
-      status: 'published',
-      date: '2024-01-18',
-      image: 'https://images.unsplash.com/photo-1594213261338-5a6876cd2f36?w=100&h=100&fit=crop',
-    },
-    {
-      id: 2,
-      title: 'Alimentos No Perecederos',
-      donor: 'Juan Pérez',
-      status: 'claimed',
-      date: '2024-01-17',
-      image: 'https://images.unsplash.com/photo-1609003040241-02456c0c7d72?w=100&h=100&fit=crop',
-    },
-    {
-      id: 3,
-      title: 'Juguetes Educativos',
-      donor: 'Ana Rodríguez',
-      status: 'delivered',
-      date: '2024-01-16',
-      image: 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?w=100&h=100&fit=crop',
-    },
-    {
-      id: 4,
-      title: 'Muebles de Hogar',
-      donor: 'Carlos Martínez',
-      status: 'in_transit',
-      date: '2024-01-15',
-      image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=100&h=100&fit=crop',
-    },
-  ]
+  const recentDonations = recentDonationsData.slice(0, 4).map(donation => {
+    const donor = donation.donor && typeof donation.donor === 'object' && 'full_name' in donation.donor
+      ? donation.donor
+      : null
+    return {
+      id: donation.id,
+      title: donation.title,
+      donor: donor?.full_name || 'Donante',
+      status: donation.status || 'pending',
+      date: donation.created_at || new Date().toISOString(),
+      image: Array.isArray(donation.images) && donation.images.length > 0 
+        ? donation.images[0] 
+        : 'https://images.unsplash.com/photo-1594213261338-5a6876cd2f36?w=100&h=100&fit=crop',
+    }
+  })
 
-  const upcomingDeliveries = [
-    {
-      id: 1,
-      donation: 'Ropa de Invierno',
-      beneficiary: 'Centro Comunitario San José',
-      scheduledDate: '2024-01-20',
-      driver: 'Pedro Sánchez',
-      status: 'scheduled',
-    },
-    {
-      id: 2,
-      donation: 'Material Escolar',
-      beneficiary: 'Escuela Primaria Los Alcarrizos',
-      scheduledDate: '2024-01-21',
-      driver: 'Luis García',
-      status: 'scheduled',
-    },
-    {
-      id: 3,
-      donation: 'Alimentos Básicos',
-      beneficiary: 'Hogar de Ancianos Santa Ana',
-      scheduledDate: '2024-01-22',
-      driver: 'Miguel Herrera',
-      status: 'scheduled',
-    },
-  ]
+  const upcomingDeliveries = upcomingDeliveriesData.slice(0, 3).map(delivery => {
+    const donation = delivery.donation && typeof delivery.donation === 'object' && 'title' in delivery.donation
+      ? delivery.donation
+      : null
+    const beneficiary = delivery.beneficiary && typeof delivery.beneficiary === 'object' && 'full_name' in delivery.beneficiary
+      ? delivery.beneficiary
+      : null
+    const driver = delivery.driver && typeof delivery.driver === 'object' && 'full_name' in delivery.driver
+      ? delivery.driver
+      : null
+    return {
+      id: delivery.id,
+      donation: donation?.title || 'Donación',
+      beneficiary: beneficiary?.full_name || 'Beneficiario',
+      scheduledDate: delivery.scheduled_delivery_at || new Date().toISOString(),
+      driver: driver?.full_name || 'Sin asignar',
+      status: delivery.status || 'pending',
+    }
+  })
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -140,8 +124,19 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-          {stats.map((stat) => {
+        {statsLoading ? (
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="bg-white overflow-hidden shadow rounded-lg animate-pulse">
+                <div className="p-5">
+                  <div className="h-20 bg-gray-200 rounded"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+            {statsCards.map((stat) => {
             const Icon = stat.icon
             return (
               <div
@@ -192,9 +187,16 @@ export default function DashboardPage() {
               </div>
             )
           })}
-        </div>
+          </div>
+        )}
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        {donationsLoading || deliveriesLoading ? (
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           {/* Recent Donations */}
           <div className="bg-white shadow rounded-lg">
             <div className="px-6 py-4 border-b border-gray-200">
@@ -226,7 +228,7 @@ export default function DashboardPage() {
                         Por {donation.donor}
                       </p>
                       <p className="text-xs text-gray-400 mt-1">
-                        {new Date(donation.date).toLocaleDateString('es-DO')}
+                        {formatDate(donation.date)}
                       </p>
                     </div>
                     <div>
@@ -268,7 +270,7 @@ export default function DashboardPage() {
                       </p>
                       <div className="mt-2 flex items-center text-xs text-gray-500">
                         <Calendar className="h-3 w-3 mr-1" />
-                        {new Date(delivery.scheduledDate).toLocaleDateString('es-DO')}
+                        {formatDate(delivery.scheduledDate)}
                         <span className="mx-2">•</span>
                         Conductor: {delivery.driver}
                       </div>
@@ -332,6 +334,8 @@ export default function DashboardPage() {
             </Link>
           </div>
         </div>
+          </>
+        )}
       </div>
     </div>
   )

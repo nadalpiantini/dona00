@@ -1,140 +1,44 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
+import { useDonations } from '@/lib/hooks/use-donations'
+import { useCategories } from '@/lib/hooks/use-categories'
+import { useStats } from '@/lib/hooks/use-stats'
+import { useAuth } from '@/components/providers/auth-provider'
 import {
-  Package, Plus, Search, Filter, Eye, Edit2, Trash2, Heart,
-  Calendar, MapPin, Users, Clock, ChevronLeft, ChevronRight,
-  Grid, List, Download, Upload, Share2, AlertCircle
+  Package, Plus, Search, Eye, Edit2, Trash2, Heart,
+  Calendar, MapPin, Users, Grid, List, Download, Upload,
+  Share2, AlertCircle, Loader2
 } from 'lucide-react'
+import { formatDate } from '@/lib/utils/format'
+import { DonationStatus } from '@/lib/types/database.types'
 
 export default function DonationsPage() {
+  const { profile } = useAuth()
   const [view, setView] = useState<'grid' | 'list'>('grid')
   const [searchTerm, setSearchTerm] = useState('')
-  const [filterStatus, setFilterStatus] = useState('all')
-  const [filterCategory, setFilterCategory] = useState('all')
-  const [selectedDonations, setSelectedDonations] = useState<number[]>([])
+  const [filterStatus, setFilterStatus] = useState<DonationStatus | 'all'>('all')
+  const [filterCategory, setFilterCategory] = useState<string>('all')
+  const [currentPage, setCurrentPage] = useState(1)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [donationToDelete, setDonationToDelete] = useState<number | null>(null)
+  const [donationToDelete, setDonationToDelete] = useState<string | null>(null)
+  const itemsPerPage = 12
 
-  // Mock data - en producción vendría de Supabase
-  const donations = [
-    {
-      id: 1,
-      title: 'Ropa de Niños - Tallas 4-8 años',
-      description: 'Conjunto completo de ropa infantil en excelente estado. Incluye pantalones, camisas y zapatos.',
-      category: 'Ropa y Calzado',
-      quantity: 15,
-      condition: 'like_new',
-      status: 'published',
-      images: ['https://images.unsplash.com/photo-1594213261338-5a6876cd2f36?w=400&h=300&fit=crop'],
-      location: 'Santo Domingo Norte',
-      donor: 'María González',
-      created_at: '2024-01-18',
-      views: 234,
-      claims: 5,
-      is_urgent: false,
-    },
-    {
-      id: 2,
-      title: 'Alimentos No Perecederos - 50kg',
-      description: 'Arroz, habichuelas, aceite, azúcar y otros productos básicos.',
-      category: 'Alimentos',
-      quantity: 1,
-      condition: 'new',
-      status: 'claimed',
-      images: ['https://images.unsplash.com/photo-1609003040241-02456c0c7d72?w=400&h=300&fit=crop'],
-      location: 'Santiago',
-      donor: 'Supermercado El Popular',
-      beneficiary: 'Fundación Niños Felices',
-      created_at: '2024-01-17',
-      views: 567,
-      claims: 12,
-      is_urgent: true,
-    },
-    {
-      id: 3,
-      title: 'Juguetes Educativos para Primaria',
-      description: 'Juegos didácticos, libros ilustrados y material educativo para niños de 6-10 años.',
-      category: 'Juguetes',
-      quantity: 30,
-      condition: 'good',
-      status: 'delivered',
-      images: ['https://images.unsplash.com/photo-1558060370-d644479cb6f7?w=400&h=300&fit=crop'],
-      location: 'La Romana',
-      donor: 'Ana Rodríguez',
-      beneficiary: 'Escuela Primaria San José',
-      created_at: '2024-01-16',
-      delivered_at: '2024-01-19',
-      views: 890,
-      claims: 8,
-      is_urgent: false,
-    },
-    {
-      id: 4,
-      title: 'Muebles de Oficina',
-      description: 'Escritorios, sillas y archivadores en buen estado para oficina o estudio.',
-      category: 'Muebles',
-      quantity: 8,
-      condition: 'good',
-      status: 'published',
-      images: ['https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=300&fit=crop'],
-      location: 'San Cristóbal',
-      donor: 'Empresa Tech Solutions',
-      created_at: '2024-01-15',
-      views: 123,
-      claims: 2,
-      is_urgent: false,
-    },
-    {
-      id: 5,
-      title: 'Material Escolar Completo',
-      description: 'Mochilas, cuadernos, lápices, colores y útiles escolares nuevos.',
-      category: 'Libros y Material Educativo',
-      quantity: 50,
-      condition: 'new',
-      status: 'in_transit',
-      images: ['https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=400&h=300&fit=crop'],
-      location: 'Puerto Plata',
-      donor: 'Librería Nacional',
-      beneficiary: 'Centro Comunitario Los Alcarrizos',
-      created_at: '2024-01-14',
-      views: 445,
-      claims: 15,
-      is_urgent: true,
-    },
-    {
-      id: 6,
-      title: 'Electrodomésticos del Hogar',
-      description: 'Nevera, estufa y microondas funcionando perfectamente.',
-      category: 'Electrodomésticos',
-      quantity: 3,
-      condition: 'good',
-      status: 'published',
-      images: ['https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop'],
-      location: 'Santo Domingo Este',
-      donor: 'Carlos Martínez',
-      created_at: '2024-01-13',
-      views: 678,
-      claims: 9,
-      is_urgent: false,
-    }
-  ]
+  const { donations, loading, total, deleteDonation, refresh } = useDonations({
+    status: filterStatus !== 'all' ? filterStatus : undefined,
+    categoryId: filterCategory !== 'all' ? filterCategory : undefined,
+    search: searchTerm || undefined,
+    limit: itemsPerPage,
+    offset: (currentPage - 1) * itemsPerPage,
+  })
 
-  const categories = [
-    'Todos',
-    'Ropa y Calzado',
-    'Alimentos',
-    'Muebles',
-    'Electrodomésticos',
-    'Juguetes',
-    'Libros y Material Educativo',
-    'Artículos del Hogar',
-    'Otros'
-  ]
+  const { categories } = useCategories()
+  const { stats } = useStats()
 
   const statuses = {
     all: 'Todos',
+    pending: 'Pendiente',
     published: 'Publicado',
     claimed: 'Reclamado',
     in_transit: 'En Tránsito',
@@ -143,15 +47,16 @@ export default function DonationsPage() {
   }
 
   const getStatusBadge = (status: string) => {
-    const statusConfig = {
+    const statusConfig: Record<string, { label: string; class: string }> = {
       published: { label: 'Publicado', class: 'bg-blue-100 text-blue-800' },
       claimed: { label: 'Reclamado', class: 'bg-yellow-100 text-yellow-800' },
       in_transit: { label: 'En Tránsito', class: 'bg-purple-100 text-purple-800' },
       delivered: { label: 'Entregado', class: 'bg-green-100 text-green-800' },
       cancelled: { label: 'Cancelado', class: 'bg-red-100 text-red-800' },
+      pending: { label: 'Pendiente', class: 'bg-gray-100 text-gray-800' },
     }
 
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.published
+    const config = statusConfig[status] || statusConfig.published
 
     return (
       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.class}`}>
@@ -161,49 +66,33 @@ export default function DonationsPage() {
   }
 
   const getConditionLabel = (condition: string) => {
-    const conditions = {
+    const conditions: Record<string, string> = {
       new: 'Nuevo',
       like_new: 'Como Nuevo',
       good: 'Buen Estado',
       fair: 'Regular'
     }
-    return conditions[condition as keyof typeof conditions] || condition
+    return conditions[condition] || condition
   }
 
-  const filteredDonations = donations.filter(donation => {
-    const matchesSearch = donation.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          donation.description.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = filterStatus === 'all' || donation.status === filterStatus
-    const matchesCategory = filterCategory === 'all' || donation.category === filterCategory
-
-    return matchesSearch && matchesStatus && matchesCategory
-  })
-
-  const handleSelectDonation = (id: number) => {
-    setSelectedDonations(prev =>
-      prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]
-    )
-  }
-
-  const handleSelectAll = () => {
-    if (selectedDonations.length === filteredDonations.length) {
-      setSelectedDonations([])
-    } else {
-      setSelectedDonations(filteredDonations.map(d => d.id))
-    }
-  }
-
-  const handleDeleteDonation = (id: number) => {
+  const handleDeleteDonation = (id: string) => {
     setDonationToDelete(id)
     setShowDeleteModal(true)
   }
 
-  const confirmDelete = () => {
-    // Aquí iría la lógica para eliminar de Supabase
-    console.log('Deleting donation:', donationToDelete)
-    setShowDeleteModal(false)
-    setDonationToDelete(null)
+  const confirmDelete = async () => {
+    if (donationToDelete) {
+      try {
+        await deleteDonation(donationToDelete)
+        setShowDeleteModal(false)
+        setDonationToDelete(null)
+      } catch (err) {
+        // Error already handled in hook
+      }
+    }
   }
+
+  const totalPages = Math.ceil(total / itemsPerPage)
 
   return (
     <div className="py-6">
@@ -222,10 +111,6 @@ export default function DonationsPage() {
               <button className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
                 <Download className="h-4 w-4 mr-2" />
                 Exportar
-              </button>
-              <button className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                <Upload className="h-4 w-4 mr-2" />
-                Importar
               </button>
               <Link
                 href="/dashboard/donations/new"
@@ -249,7 +134,7 @@ export default function DonationsPage() {
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">Total Donaciones</dt>
-                    <dd className="text-2xl font-semibold text-gray-900">1,234</dd>
+                    <dd className="text-2xl font-semibold text-gray-900">{stats.totalDonations}</dd>
                   </dl>
                 </div>
               </div>
@@ -265,7 +150,7 @@ export default function DonationsPage() {
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">Publicadas</dt>
-                    <dd className="text-2xl font-semibold text-gray-900">456</dd>
+                    <dd className="text-2xl font-semibold text-gray-900">{stats.publishedDonations}</dd>
                   </dl>
                 </div>
               </div>
@@ -281,7 +166,7 @@ export default function DonationsPage() {
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">Reclamadas</dt>
-                    <dd className="text-2xl font-semibold text-gray-900">234</dd>
+                    <dd className="text-2xl font-semibold text-gray-900">{stats.claimedDonations}</dd>
                   </dl>
                 </div>
               </div>
@@ -297,7 +182,7 @@ export default function DonationsPage() {
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">Entregadas</dt>
-                    <dd className="text-2xl font-semibold text-gray-900">544</dd>
+                    <dd className="text-2xl font-semibold text-gray-900">{stats.deliveredDonations}</dd>
                   </dl>
                 </div>
               </div>
@@ -321,7 +206,10 @@ export default function DonationsPage() {
                     name="search"
                     id="search"
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value)
+                      setCurrentPage(1)
+                    }}
                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     placeholder="Buscar donaciones..."
                   />
@@ -332,7 +220,10 @@ export default function DonationsPage() {
               <div className="flex items-center space-x-3">
                 <select
                   value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
+                  onChange={(e) => {
+                    setFilterStatus(e.target.value as DonationStatus | 'all')
+                    setCurrentPage(1)
+                  }}
                   className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                 >
                   {Object.entries(statuses).map(([value, label]) => (
@@ -342,12 +233,15 @@ export default function DonationsPage() {
 
                 <select
                   value={filterCategory}
-                  onChange={(e) => setFilterCategory(e.target.value)}
+                  onChange={(e) => {
+                    setFilterCategory(e.target.value)
+                    setCurrentPage(1)
+                  }}
                   className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                 >
                   <option value="all">Todas las Categorías</option>
-                  {categories.slice(1).map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
                 </select>
 
@@ -368,225 +262,296 @@ export default function DonationsPage() {
                 </div>
               </div>
             </div>
-
-            {/* Selected Actions */}
-            {selectedDonations.length > 0 && (
-              <div className="mt-4 flex items-center justify-between bg-blue-50 px-4 py-2 rounded-md">
-                <span className="text-sm text-blue-700">
-                  {selectedDonations.length} donacion(es) seleccionada(s)
-                </span>
-                <div className="flex items-center space-x-2">
-                  <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
-                    Publicar
-                  </button>
-                  <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
-                    Archivar
-                  </button>
-                  <button className="text-sm text-red-600 hover:text-red-700 font-medium">
-                    Eliminar
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
-        {/* Donations Grid/List */}
-        {view === 'grid' ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredDonations.map((donation) => (
-              <div key={donation.id} className="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow">
-                <div className="relative">
-                  <img
-                    className="h-48 w-full object-cover"
-                    src={donation.images[0]}
-                    alt={donation.title}
-                  />
-                  {donation.is_urgent && (
-                    <span className="absolute top-2 left-2 inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-red-500 text-white">
-                      <AlertCircle className="h-3 w-3 mr-1" />
-                      Urgente
-                    </span>
-                  )}
-                  <div className="absolute top-2 right-2">
-                    {getStatusBadge(donation.status)}
-                  </div>
-                </div>
-
-                <div className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">
-                        {donation.title}
-                      </h3>
-                      <p className="mt-1 text-sm text-gray-500 line-clamp-2">
-                        {donation.description}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 flex items-center justify-between text-sm text-gray-500">
-                    <div className="flex items-center">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      {donation.location}
-                    </div>
-                    <div className="flex items-center">
-                      <Calendar className="h-4 w-4 mr-1" />
-                      {new Date(donation.created_at).toLocaleDateString('es-DO')}
-                    </div>
-                  </div>
-
-                  <div className="mt-3 flex items-center justify-between">
-                    <span className="text-sm text-gray-500">
-                      Cantidad: <span className="font-medium">{donation.quantity}</span>
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      {getConditionLabel(donation.condition)}
-                    </span>
-                  </div>
-
-                  <div className="mt-4 flex items-center justify-between">
-                    <div className="flex items-center space-x-2 text-sm text-gray-500">
-                      <Eye className="h-4 w-4" />
-                      <span>{donation.views}</span>
-                      <Heart className="h-4 w-4 ml-2" />
-                      <span>{donation.claims}</span>
-                    </div>
-
-                    <div className="flex items-center space-x-1">
-                      <button className="p-1 text-gray-400 hover:text-blue-600">
-                        <Eye className="h-4 w-4" />
-                      </button>
-                      <button className="p-1 text-gray-400 hover:text-blue-600">
-                        <Edit2 className="h-4 w-4" />
-                      </button>
-                      <button className="p-1 text-gray-400 hover:text-blue-600">
-                        <Share2 className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteDonation(donation.id)}
-                        className="p-1 text-gray-400 hover:text-red-600"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+        {/* Loading State */}
+        {loading && (
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
           </div>
-        ) : (
-          <div className="bg-white shadow overflow-hidden sm:rounded-md">
-            <ul className="divide-y divide-gray-200">
-              {filteredDonations.map((donation) => (
-                <li key={donation.id}>
-                  <div className="px-4 py-4 flex items-center sm:px-6">
-                    <div className="min-w-0 flex-1 sm:flex sm:items-center sm:justify-between">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0">
-                          <img className="h-16 w-16 rounded-lg object-cover" src={donation.images[0]} alt="" />
-                        </div>
-                        <div className="ml-4">
-                          <div className="flex items-center">
-                            <h3 className="text-lg font-medium text-gray-900">{donation.title}</h3>
-                            {donation.is_urgent && (
-                              <span className="ml-2 inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-red-500 text-white">
-                                <AlertCircle className="h-3 w-3 mr-1" />
-                                Urgente
-                              </span>
-                            )}
-                          </div>
-                          <p className="mt-1 text-sm text-gray-600">{donation.description}</p>
-                          <div className="mt-2 flex items-center text-sm text-gray-500 space-x-4">
-                            <span className="flex items-center">
-                              <MapPin className="h-4 w-4 mr-1" />
-                              {donation.location}
-                            </span>
-                            <span>Cantidad: {donation.quantity}</span>
-                            <span>{getConditionLabel(donation.condition)}</span>
-                            <span className="flex items-center">
-                              <Eye className="h-4 w-4 mr-1" />
-                              {donation.views}
-                            </span>
-                            <span className="flex items-center">
-                              <Heart className="h-4 w-4 mr-1" />
-                              {donation.claims}
-                            </span>
-                          </div>
+        )}
+
+        {/* Donations Grid/List */}
+        {!loading && donations.length === 0 && (
+          <div className="bg-white shadow rounded-lg p-12 text-center">
+            <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No hay donaciones</h3>
+            <p className="text-gray-500 mb-4">
+              {searchTerm || filterStatus !== 'all' || filterCategory !== 'all'
+                ? 'No se encontraron donaciones con los filtros seleccionados'
+                : 'Comienza creando tu primera donación'}
+            </p>
+            {!searchTerm && filterStatus === 'all' && filterCategory === 'all' && (
+              <Link
+                href="/dashboard/donations/new"
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Nueva Donación
+              </Link>
+            )}
+          </div>
+        )}
+
+        {!loading && donations.length > 0 && (
+          <>
+            {view === 'grid' ? (
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {donations.map((donation) => (
+                  <div key={donation.id} className="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow">
+                    <div className="relative">
+                      {donation.images && donation.images.length > 0 && (
+                        <img
+                          className="h-48 w-full object-cover"
+                          src={Array.isArray(donation.images) ? donation.images[0] : donation.images}
+                          alt={donation.title}
+                        />
+                      )}
+                      {donation.is_urgent && (
+                        <span className="absolute top-2 left-2 inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-red-500 text-white">
+                          <AlertCircle className="h-3 w-3 mr-1" />
+                          Urgente
+                        </span>
+                      )}
+                      <div className="absolute top-2 right-2">
+                        {getStatusBadge(donation.status || 'pending')}
+                      </div>
+                    </div>
+
+                    <div className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">
+                            {donation.title}
+                          </h3>
+                          <p className="mt-1 text-sm text-gray-500 line-clamp-2">
+                            {donation.description}
+                          </p>
                         </div>
                       </div>
-                      <div className="mt-4 sm:mt-0 sm:ml-5">
-                        <div className="flex items-center space-x-2">
-                          {getStatusBadge(donation.status)}
-                          <button className="p-1 text-gray-400 hover:text-blue-600">
-                            <Eye className="h-5 w-5" />
-                          </button>
-                          <button className="p-1 text-gray-400 hover:text-blue-600">
-                            <Edit2 className="h-5 w-5" />
-                          </button>
-                          <button className="p-1 text-gray-400 hover:text-blue-600">
-                            <Share2 className="h-5 w-5" />
-                          </button>
+
+                      <div className="mt-3 flex items-center justify-between text-sm text-gray-500">
+                        {donation.pickup_address && (
+                          <div className="flex items-center">
+                            <MapPin className="h-4 w-4 mr-1" />
+                            <span className="truncate max-w-[150px]">
+                              {typeof donation.pickup_address === 'string' 
+                                ? donation.pickup_address 
+                                : donation.pickup_address.city || 'Ubicación'}
+                            </span>
+                          </div>
+                        )}
+                        {donation.created_at && (
+                          <div className="flex items-center">
+                            <Calendar className="h-4 w-4 mr-1" />
+                            {formatDate(donation.created_at)}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="mt-3 flex items-center justify-between">
+                        <span className="text-sm text-gray-500">
+                          Cantidad: <span className="font-medium">{donation.quantity || 1}</span>
+                        </span>
+                        {donation.condition && (
+                          <span className="text-sm text-gray-500">
+                            {getConditionLabel(donation.condition)}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="mt-4 flex items-center justify-between">
+                        <div className="flex items-center space-x-2 text-sm text-gray-500">
+                          <Eye className="h-4 w-4" />
+                          <span>{donation.views_count || 0}</span>
+                        </div>
+
+                        <div className="flex items-center space-x-1">
+                          <Link
+                            href={`/dashboard/donations/${donation.id}`}
+                            className="p-1 text-gray-400 hover:text-blue-600"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Link>
+                          <Link
+                            href={`/dashboard/donations/${donation.id}/edit`}
+                            className="p-1 text-gray-400 hover:text-blue-600"
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Link>
                           <button
                             onClick={() => handleDeleteDonation(donation.id)}
                             className="p-1 text-gray-400 hover:text-red-600"
                           >
-                            <Trash2 className="h-5 w-5" />
+                            <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
                       </div>
                     </div>
                   </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white shadow overflow-hidden sm:rounded-md">
+                <ul className="divide-y divide-gray-200">
+                  {donations.map((donation) => (
+                    <li key={donation.id}>
+                      <div className="px-4 py-4 flex items-center sm:px-6">
+                        <div className="min-w-0 flex-1 sm:flex sm:items-center sm:justify-between">
+                          <div className="flex items-center">
+                            {donation.images && donation.images.length > 0 && (
+                              <div className="flex-shrink-0">
+                                <img 
+                                  className="h-16 w-16 rounded-lg object-cover" 
+                                  src={Array.isArray(donation.images) ? donation.images[0] : donation.images} 
+                                  alt={donation.title} 
+                                />
+                              </div>
+                            )}
+                            <div className="ml-4">
+                              <div className="flex items-center">
+                                <h3 className="text-lg font-medium text-gray-900">{donation.title}</h3>
+                                {donation.is_urgent && (
+                                  <span className="ml-2 inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-red-500 text-white">
+                                    <AlertCircle className="h-3 w-3 mr-1" />
+                                    Urgente
+                                  </span>
+                                )}
+                              </div>
+                              <p className="mt-1 text-sm text-gray-600">{donation.description}</p>
+                              <div className="mt-2 flex items-center text-sm text-gray-500 space-x-4">
+                                {donation.pickup_address && (
+                                  <span className="flex items-center">
+                                    <MapPin className="h-4 w-4 mr-1" />
+                                    {typeof donation.pickup_address === 'string' 
+                                      ? donation.pickup_address 
+                                      : donation.pickup_address.city || 'Ubicación'}
+                                  </span>
+                                )}
+                                <span>Cantidad: {donation.quantity || 1}</span>
+                                {donation.condition && (
+                                  <span>{getConditionLabel(donation.condition)}</span>
+                                )}
+                                <span className="flex items-center">
+                                  <Eye className="h-4 w-4 mr-1" />
+                                  {donation.views_count || 0}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="mt-4 sm:mt-0 sm:ml-5">
+                            <div className="flex items-center space-x-2">
+                              {getStatusBadge(donation.status || 'pending')}
+                              <Link
+                                href={`/dashboard/donations/${donation.id}`}
+                                className="p-1 text-gray-400 hover:text-blue-600"
+                              >
+                                <Eye className="h-5 w-5" />
+                              </Link>
+                              <Link
+                                href={`/dashboard/donations/${donation.id}/edit`}
+                                className="p-1 text-gray-400 hover:text-blue-600"
+                              >
+                                <Edit2 className="h-5 w-5" />
+                              </Link>
+                              <button
+                                onClick={() => handleDeleteDonation(donation.id)}
+                                className="p-1 text-gray-400 hover:text-red-600"
+                              >
+                                <Trash2 className="h-5 w-5" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
-        {/* Pagination */}
-        <div className="mt-6 flex items-center justify-between">
-          <div className="flex-1 flex justify-between sm:hidden">
-            <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-              Anterior
-            </button>
-            <button className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-              Siguiente
-            </button>
-          </div>
-          <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm text-gray-700">
-                Mostrando <span className="font-medium">1</span> a <span className="font-medium">10</span> de{' '}
-                <span className="font-medium">97</span> resultados
-              </p>
-            </div>
-            <div>
-              <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                  <ChevronLeft className="h-5 w-5" />
-                </button>
-                <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                  1
-                </button>
-                <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-blue-50 text-sm font-medium text-blue-600">
-                  2
-                </button>
-                <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                  3
-                </button>
-                <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                  <ChevronRight className="h-5 w-5" />
-                </button>
-              </nav>
-            </div>
-          </div>
-        </div>
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-6 flex items-center justify-between">
+                <div className="flex-1 flex justify-between sm:hidden">
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    Anterior
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    Siguiente
+                  </button>
+                </div>
+                <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm text-gray-700">
+                      Mostrando <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> a{' '}
+                      <span className="font-medium">{Math.min(currentPage * itemsPerPage, total)}</span> de{' '}
+                      <span className="font-medium">{total}</span> resultados
+                    </p>
+                  </div>
+                  <div>
+                    <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                      <button
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                        className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                      >
+                        Anterior
+                      </button>
+                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                        let pageNum
+                        if (totalPages <= 5) {
+                          pageNum = i + 1
+                        } else if (currentPage <= 3) {
+                          pageNum = i + 1
+                        } else if (currentPage >= totalPages - 2) {
+                          pageNum = totalPages - 4 + i
+                        } else {
+                          pageNum = currentPage - 2 + i
+                        }
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => setCurrentPage(pageNum)}
+                            className={`relative inline-flex items-center px-4 py-2 border ${
+                              currentPage === pageNum
+                                ? 'border-blue-500 bg-blue-50 text-blue-600'
+                                : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                            } text-sm font-medium`}
+                          >
+                            {pageNum}
+                          </button>
+                        )
+                      })}
+                      <button
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        disabled={currentPage === totalPages}
+                        className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                      >
+                        Siguiente
+                      </button>
+                    </nav>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
 
         {/* Delete Modal */}
         {showDeleteModal && (
           <div className="fixed z-50 inset-0 overflow-y-auto">
             <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-              <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+              <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={() => setShowDeleteModal(false)}></div>
               <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
               <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                 <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
@@ -614,7 +579,10 @@ export default function DonationsPage() {
                     Eliminar
                   </button>
                   <button
-                    onClick={() => setShowDeleteModal(false)}
+                    onClick={() => {
+                      setShowDeleteModal(false)
+                      setDonationToDelete(null)
+                    }}
                     className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                   >
                     Cancelar

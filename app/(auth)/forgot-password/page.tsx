@@ -1,0 +1,147 @@
+'use client'
+
+import { useState } from 'react'
+import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
+import { Heart, Mail, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react'
+import toast from 'react-hot-toast'
+
+export default function ForgotPasswordPage() {
+  const [email, setEmail] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
+  const supabase = createClient()
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      })
+
+      if (resetError) {
+        toast.error(resetError.message || 'Error al enviar el correo de recuperación')
+        throw resetError
+      }
+
+      toast.success('Correo de recuperación enviado. Revisa tu bandeja de entrada.')
+      setSuccess(true)
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al enviar el correo de recuperación. Por favor intenta de nuevo.'
+      setError(errorMessage)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (success) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          <div className="bg-white rounded-2xl shadow-xl p-8">
+            <div className="text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                <CheckCircle className="h-6 w-6 text-green-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Correo Enviado
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Hemos enviado un enlace de recuperación a <strong>{email}</strong>. 
+                Por favor revisa tu correo electrónico y sigue las instrucciones.
+              </p>
+              <Link
+                href="/login"
+                className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Volver al inicio de sesión
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div className="bg-white rounded-2xl shadow-xl p-8">
+          {/* Logo and Title */}
+          <div className="text-center">
+            <Link href="/" className="inline-flex items-center justify-center space-x-2 mb-6">
+              <Heart className="h-10 w-10 text-blue-600" />
+              <span className="text-3xl font-bold text-gray-900">DONA+</span>
+            </Link>
+
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Recuperar Contraseña
+            </h2>
+            <p className="text-gray-600">
+              Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña
+            </p>
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start space-x-3">
+              <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+              <span className="text-sm text-red-700">{error}</span>
+            </div>
+          )}
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                Correo Electrónico
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="tu@email.com"
+                />
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {loading ? 'Enviando...' : 'Enviar Enlace de Recuperación'}
+            </button>
+
+            {/* Back to Login */}
+            <div className="text-center">
+              <Link
+                href="/login"
+                className="inline-flex items-center text-sm text-blue-600 hover:text-blue-700 font-medium"
+              >
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                Volver al inicio de sesión
+              </Link>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  )
+}
+

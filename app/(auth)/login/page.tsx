@@ -23,8 +23,8 @@ export default function LoginPage() {
     try {
       await signIn(email, password)
       router.push('/dashboard')
-    } catch (err: any) {
-      setError(err.message || 'Error al iniciar sesión. Por favor intenta de nuevo.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al iniciar sesión. Por favor intenta de nuevo.')
     } finally {
       setLoading(false)
     }

@@ -67,11 +67,11 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  // TEMPORARILY DISABLED FOR DEVELOPMENT
   // Redirect to login if accessing protected route without auth
-  // if (isProtectedPath && !user) {
-  //   return NextResponse.redirect(new URL('/login', request.url))
-  // }
+  // Only disable in development if explicitly needed
+  if (isProtectedPath && !user && process.env.NODE_ENV === 'production') {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
 
   // Redirect to dashboard if accessing auth pages while logged in
   if (isAuthPath && user) {
