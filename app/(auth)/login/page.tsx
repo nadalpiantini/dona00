@@ -4,7 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/components/providers/auth-provider'
-import { Heart, Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react'
+import { Heart, Mail, Lock, Eye, EyeOff, AlertCircle, Bug } from 'lucide-react'
+import { runDiagnostics } from '@/lib/utils/diagnose'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -14,6 +15,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [diagnosing, setDiagnosing] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,6 +29,17 @@ export default function LoginPage() {
       setError(err instanceof Error ? err.message : 'Error al iniciar sesión. Por favor intenta de nuevo.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleDiagnose = async () => {
+    setDiagnosing(true)
+    try {
+      await runDiagnostics()
+    } catch (err) {
+      console.error('Error en diagnóstico:', err)
+    } finally {
+      setDiagnosing(false)
     }
   }
 
@@ -205,6 +218,25 @@ export default function LoginPage() {
               Regístrate gratis
             </Link>
           </p>
+
+          {/* Diagnostic Button (Development Only) */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={handleDiagnose}
+                disabled={diagnosing}
+                className="w-full flex items-center justify-center gap-2 py-2 px-4 text-xs text-gray-500 hover:text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Ejecutar diagnóstico de Supabase (solo desarrollo)"
+              >
+                <Bug className="h-3 w-3" />
+                {diagnosing ? 'Ejecutando diagnóstico...' : '🔍 Diagnosticar Supabase'}
+              </button>
+              <p className="mt-2 text-xs text-center text-gray-400">
+                Revisa la consola del navegador para ver los resultados
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { AuthProvider } from "@/components/providers/auth-provider";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { DevDiagnostic } from "@/components/dev-diagnostic";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 
@@ -38,6 +39,7 @@ export default function RootLayout({
       >
         <ErrorBoundary>
           <AuthProvider>
+            <DevDiagnostic />
             <Toaster
               position="top-right"
               toastOptions={{

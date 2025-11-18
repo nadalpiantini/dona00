@@ -135,18 +135,70 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase, fetchProfile])
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    try {
+      // Validate Supabase configuration before attempting login
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      
+      if (!supabaseUrl || !supabaseAnonKey) {
+        const errorMsg = 'Error de configuración: Variables de entorno de Supabase no encontradas'
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Missing Supabase env vars:', { supabaseUrl: !!supabaseUrl, supabaseAnonKey: !!supabaseAnonKey })
+        }
+        toast.error(errorMsg)
+        throw new Error(errorMsg)
+      }
 
-    if (error) {
-      toast.error(error.message || 'Error al iniciar sesión')
-      throw error
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (error) {
+        // Log detailed error in development for debugging
+        if (process.env.NODE_ENV === 'development') {
+          console.error('SignIn error:', {
+            message: error.message,
+            status: error.status,
+            name: error.name,
+            supabaseUrl: supabaseUrl ? 'configured' : 'missing',
+            anonKey: supabaseAnonKey ? 'configured' : 'missing',
+          })
+        }
+        
+        // Provide user-friendly error messages
+        let errorMessage = 'Error al iniciar sesión'
+        const errorMsgLower = error.message?.toLowerCase() || ''
+        
+        if (error.status === 401) {
+          // Check for specific error messages from Supabase
+          if (errorMsgLower.includes('email not confirmed') || errorMsgLower.includes('email_not_confirmed')) {
+            errorMessage = 'Por favor confirma tu email antes de iniciar sesión. Revisa tu bandeja de entrada.'
+          } else if (errorMsgLower.includes('invalid login credentials') || errorMsgLower.includes('invalid_credentials')) {
+            errorMessage = 'Credenciales incorrectas. Verifica tu email y contraseña.'
+          } else if (errorMsgLower.includes('user not found')) {
+            errorMessage = 'No existe una cuenta con este email. ¿Quieres registrarte?'
+          } else {
+            errorMessage = 'Credenciales incorrectas. Verifica tu email y contraseña.'
+          }
+        } else if (error.status === 400) {
+          errorMessage = error.message || 'Datos inválidos. Verifica tu email y contraseña.'
+        } else if (error.status === 429) {
+          errorMessage = 'Demasiados intentos. Por favor intenta más tarde.'
+        } else {
+          errorMessage = error.message || 'Error al iniciar sesión. Por favor intenta de nuevo.'
+        }
+        
+        toast.error(errorMessage)
+        throw error
+      }
+
+      toast.success('¡Bienvenido de vuelta!')
+      router.push('/dashboard')
+    } catch (err) {
+      // Re-throw to let caller handle it
+      throw err
     }
-
-    toast.success('¡Bienvenido de vuelta!')
-    router.push('/dashboard')
   }
 
   const signUp = async (email: string, password: string, fullName: string, phone?: string) => {
