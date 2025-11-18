@@ -7,7 +7,8 @@ import {
   Mail, Phone, MapPin, Camera, Save, Check, X, AlertCircle,
   Key, Smartphone, Monitor, Moon, Sun, ChevronRight,
   Package, Truck, Heart, FileText, Download, Upload,
-  HelpCircle, ExternalLink, ToggleLeft, ToggleRight
+  HelpCircle, ExternalLink, ToggleLeft, ToggleRight,
+  Calendar, RefreshCw
 } from 'lucide-react'
 
 type TabType = 'profile' | 'notifications' | 'security' | 'appearance' | 'organization' | 'billing' | 'integrations'
