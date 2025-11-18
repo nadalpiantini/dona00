@@ -1,0 +1,57 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - link "DONA+" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - img [ref=e7]
+        - generic [ref=e9]: DONA+
+      - heading "Bienvenido de vuelta" [level=2] [ref=e10]
+      - paragraph [ref=e11]: Ingresa tus credenciales para continuar
+    - generic [ref=e12]:
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - generic [ref=e15]: Correo Electrónico
+          - generic [ref=e16]:
+            - generic:
+              - img
+            - textbox "Correo Electrónico" [ref=e17]:
+              - /placeholder: tu@email.com
+        - generic [ref=e18]:
+          - generic [ref=e19]: Contraseña
+          - generic [ref=e20]:
+            - generic:
+              - img
+            - textbox "Contraseña" [ref=e21]:
+              - /placeholder: ••••••••
+              - text: testpassword
+            - button [active] [ref=e22] [cursor=pointer]:
+              - img [ref=e23]
+      - generic [ref=e28]:
+        - generic [ref=e29]:
+          - checkbox "Recordarme" [ref=e30]
+          - generic [ref=e31]: Recordarme
+        - link "¿Olvidaste tu contraseña?" [ref=e32] [cursor=pointer]:
+          - /url: /forgot-password
+      - button "Iniciar Sesión" [ref=e33] [cursor=pointer]
+      - generic [ref=e38]: O continúa con
+      - generic [ref=e39]:
+        - button "Google" [ref=e40] [cursor=pointer]:
+          - img [ref=e41]
+          - generic [ref=e46]: Google
+        - button "Facebook" [ref=e47] [cursor=pointer]:
+          - img [ref=e48]
+          - generic [ref=e50]: Facebook
+    - paragraph [ref=e51]:
+      - text: ¿No tienes una cuenta?
+      - link "Regístrate gratis" [ref=e52] [cursor=pointer]:
+        - /url: /signup
+    - generic [ref=e53]:
+      - button "🔍 Diagnosticar Supabase" [ref=e54] [cursor=pointer]:
+        - img [ref=e55]
+        - text: 🔍 Diagnosticar Supabase
+      - paragraph [ref=e64]: Revisa la consola del navegador para ver los resultados
+  - alert [ref=e65]
+```

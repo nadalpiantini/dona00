@@ -1,0 +1,58 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - link "DONA+" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - img [ref=e7]
+        - generic [ref=e9]: DONA+
+      - heading "Bienvenido de vuelta" [level=2] [ref=e10]
+      - paragraph [ref=e11]: Ingresa tus credenciales para continuar
+    - generic [ref=e12]:
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - generic [ref=e15]: Correo Electrónico
+          - generic [ref=e16]:
+            - generic:
+              - img
+            - textbox "Correo Electrónico" [ref=e17]:
+              - /placeholder: tu@email.com
+              - text: invalid@example.com
+        - generic [ref=e18]:
+          - generic [ref=e19]: Contraseña
+          - generic [ref=e20]:
+            - generic:
+              - img
+            - textbox "Contraseña" [ref=e21]:
+              - /placeholder: ••••••••
+              - text: wrongpassword
+            - button [ref=e22] [cursor=pointer]:
+              - img [ref=e23]
+      - generic [ref=e26]:
+        - generic [ref=e27]:
+          - checkbox "Recordarme" [ref=e28]
+          - generic [ref=e29]: Recordarme
+        - link "¿Olvidaste tu contraseña?" [ref=e30] [cursor=pointer]:
+          - /url: /forgot-password
+      - button "Iniciando sesión..." [disabled] [ref=e31]
+      - generic [ref=e36]: O continúa con
+      - generic [ref=e37]:
+        - button "Google" [ref=e38] [cursor=pointer]:
+          - img [ref=e39]
+          - generic [ref=e44]: Google
+        - button "Facebook" [ref=e45] [cursor=pointer]:
+          - img [ref=e46]
+          - generic [ref=e48]: Facebook
+    - paragraph [ref=e49]:
+      - text: ¿No tienes una cuenta?
+      - link "Regístrate gratis" [ref=e50] [cursor=pointer]:
+        - /url: /signup
+    - generic [ref=e51]:
+      - button "🔍 Diagnosticar Supabase" [ref=e52] [cursor=pointer]:
+        - img [ref=e53]
+        - text: 🔍 Diagnosticar Supabase
+      - paragraph [ref=e62]: Revisa la consola del navegador para ver los resultados
+  - alert [ref=e63]
+```
