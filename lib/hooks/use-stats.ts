@@ -25,6 +25,28 @@ export function useStats() {
     try {
       setLoading(true)
 
+      // In development, check if we have a real session
+      if (process.env.NODE_ENV === 'development') {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session) {
+          // Mock user without real session - return empty stats silently
+          setStats({
+            totalDonations: 0,
+            publishedDonations: 0,
+            claimedDonations: 0,
+            deliveredDonations: 0,
+            totalCenters: 0,
+            activeCenters: 0,
+            totalDeliveries: 0,
+            inTransitDeliveries: 0,
+            totalBeneficiaries: 0,
+            verifiedBeneficiaries: 0,
+          })
+          setLoading(false)
+          return
+        }
+      }
+
       const organizationFilter = profile?.organization_id
         ? { organization_id: profile.organization_id }
         : {}
@@ -72,6 +94,19 @@ export function useStats() {
       if (process.env.NODE_ENV === 'development') {
         console.error('Error loading stats:', err)
       }
+      // Set empty stats on error
+      setStats({
+        totalDonations: 0,
+        publishedDonations: 0,
+        claimedDonations: 0,
+        deliveredDonations: 0,
+        totalCenters: 0,
+        activeCenters: 0,
+        totalDeliveries: 0,
+        inTransitDeliveries: 0,
+        totalBeneficiaries: 0,
+        verifiedBeneficiaries: 0,
+      })
     } finally {
       setLoading(false)
     }

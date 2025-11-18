@@ -74,6 +74,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (!isSessionMissing && process.env.NODE_ENV === 'development') {
             console.error('Error getting user:', error)
           }
+          
+          // In development, create a mock user if no real user exists
+          if (isSessionMissing && process.env.NODE_ENV === 'development') {
+            const mockUser = {
+              id: 'dev-mock-user-id',
+              email: 'dev@dona.local',
+              created_at: new Date().toISOString(),
+            } as SupabaseUser
+            
+            const mockProfile: User = {
+              id: 'dev-mock-user-id',
+              email: 'dev@dona.local',
+              full_name: 'Usuario Demo',
+              role: 'org_admin',
+              is_active: true,
+              is_verified: true,
+              created_at: new Date().toISOString(),
+            }
+            
+            setUser(mockUser)
+            setProfile(mockProfile)
+            if (mounted) {
+              setLoading(false)
+            }
+            return
+          }
+          
           // Set user to null and stop loading regardless of error type
           setUser(null)
           if (mounted) {
@@ -85,6 +112,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(user)
         if (user) {
           await fetchProfile(user.id)
+        } else if (process.env.NODE_ENV === 'development') {
+          // In development, create a mock user if no real user exists
+          const mockUser = {
+            id: 'dev-mock-user-id',
+            email: 'dev@dona.local',
+            created_at: new Date().toISOString(),
+          } as SupabaseUser
+          
+          const mockProfile: User = {
+            id: 'dev-mock-user-id',
+            email: 'dev@dona.local',
+            full_name: 'Usuario Demo',
+            role: 'org_admin',
+            is_active: true,
+            is_verified: true,
+            created_at: new Date().toISOString(),
+          }
+          
+          setUser(mockUser)
+          setProfile(mockProfile)
         }
         if (mounted) {
           setLoading(false)
@@ -104,6 +151,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (!isSessionMissing && process.env.NODE_ENV === 'development') {
           console.error('Error in getUser:', err)
         }
+        
+        // In development, create a mock user if no real user exists
+        if (isSessionMissing && process.env.NODE_ENV === 'development') {
+          const mockUser = {
+            id: 'dev-mock-user-id',
+            email: 'dev@dona.local',
+            created_at: new Date().toISOString(),
+          } as SupabaseUser
+          
+          const mockProfile: User = {
+            id: 'dev-mock-user-id',
+            email: 'dev@dona.local',
+            full_name: 'Usuario Demo',
+            role: 'org_admin',
+            is_active: true,
+            is_verified: true,
+            created_at: new Date().toISOString(),
+          }
+          
+          setUser(mockUser)
+          setProfile(mockProfile)
+          if (mounted) {
+            setLoading(false)
+          }
+          return
+        }
+        
         // Set user to null on any error
         setUser(null)
         if (mounted) {
@@ -122,7 +196,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (session?.user) {
           await fetchProfile(session.user.id)
         } else {
-          setProfile(null)
+          // In development, create a mock user if no real user exists
+          if (process.env.NODE_ENV === 'development') {
+            const mockUser = {
+              id: 'dev-mock-user-id',
+              email: 'dev@dona.local',
+              created_at: new Date().toISOString(),
+            } as SupabaseUser
+            
+            const mockProfile: User = {
+              id: 'dev-mock-user-id',
+              email: 'dev@dona.local',
+              full_name: 'Usuario Demo',
+              role: 'org_admin',
+              is_active: true,
+              is_verified: true,
+              created_at: new Date().toISOString(),
+            }
+            
+            setUser(mockUser)
+            setProfile(mockProfile)
+          } else {
+            setProfile(null)
+          }
         }
         setLoading(false)
       }
@@ -318,6 +414,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
+    // In development with mock user, just clear state
+    if (process.env.NODE_ENV === 'development' && user?.id === 'dev-mock-user-id') {
+      setUser(null)
+      setProfile(null)
+      toast.success('Sesión cerrada exitosamente')
+      router.push('/')
+      return
+    }
+
     const { error } = await supabase.auth.signOut()
     if (error) {
       toast.error('Error al cerrar sesión')

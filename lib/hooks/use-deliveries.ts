@@ -26,6 +26,17 @@ export function useDeliveries(filters?: {
       setLoading(true)
       setError(null)
 
+      // In development, check if we have a real session
+      if (process.env.NODE_ENV === 'development') {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session) {
+          // Mock user without real session - return empty data silently
+          setDeliveries([])
+          setLoading(false)
+          return
+        }
+      }
+
       let query = supabase
         .from('dona_deliveries')
         .select(`
@@ -61,7 +72,11 @@ export function useDeliveries(filters?: {
     } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error('Unknown error')
       setError(error.message)
-      toast.error('Error al cargar entregas')
+      // Only show toast in production or if it's not a session error
+      if (process.env.NODE_ENV === 'production' || !error.message?.toLowerCase().includes('session')) {
+        toast.error('Error al cargar entregas')
+      }
+      setDeliveries([])
     } finally {
       setLoading(false)
     }
