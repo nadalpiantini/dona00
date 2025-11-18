@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DONA+ - Sistema de Gestión de Donaciones
 
-## Getting Started
+Plataforma SaaS B2B2C para empresas de transporte que facilita la gestión de donaciones conectando donantes con beneficiarios.
 
-First, run the development server:
+## 🌐 Live Demo
+- **Producción**: [dona.sujeto10.com](https://dona.sujeto10.com)
+- **GitHub**: [github.com/nadalpiantini/dona00](https://github.com/nadalpiantini/dona00)
+
+## 🚀 Características
+
+### Dashboard Completo
+- **Donaciones**: Gestión completa con estados (publicado, reclamado, en tránsito, entregado)
+- **Centros de Acopio**: Control de capacidad, horarios y voluntarios
+- **Entregas**: Tracking en tiempo real con asignación de conductores
+- **Mensajes**: Sistema de chat integrado con soporte multimedia
+- **Beneficiarios**: Verificación, calificaciones e historial
+- **Reportes**: Analytics con KPIs y gráficos de impacto
+- **Configuración**: Perfil, notificaciones, seguridad, facturación
+
+## 🛠️ Stack Tecnológico
+- **Frontend**: Next.js 14.2.18, TypeScript, Tailwind CSS
+- **Backend**: Supabase (PostgreSQL, Auth, Realtime)
+- **Deployment**: Vercel
+- **Domain**: dona.sujeto10.com
+
+## 📋 Instalación Local
 
 ```bash
+# Clonar repositorio
+git clone https://github.com/nadalpiantini/dona00.git
+cd dona00
+
+# Instalar dependencias
+npm install
+
+# Configurar variables de entorno
+cp .env.example .env.local
+# Editar .env.local con tus credenciales de Supabase
+
+# Ejecutar migraciones
+npx supabase db push
+
+# Iniciar servidor de desarrollo
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abrir [http://localhost:3003](http://localhost:3003)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🔧 Configuración de Deployment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Deploy con Vercel (Recomendado)
 
-## Learn More
+1. Instalar Vercel CLI:
+```bash
+npm i -g vercel
+```
 
-To learn more about Next.js, take a look at the following resources:
+2. Deploy:
+```bash
+vercel --prod
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. Configurar dominio personalizado en Vercel Dashboard
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🔐 Variables de Entorno
 
-## Deploy on Vercel
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://nqzhxukuvmdlpewqytpv.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+NEXT_PUBLIC_APP_URL=https://dona.sujeto10.com
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📄 Licencia
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Propiedad de DONA+ - Todos los derechos reservados
+
+---
+
+Desarrollado con ❤️ para el Banco Popular Dominicano
