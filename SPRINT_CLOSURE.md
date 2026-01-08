@@ -68,7 +68,13 @@
 - **Navegación Completa**: Todos los links verificados y funcionando
 - **UX Mejorada**: Estados de carga, errores, modales, búsqueda
 
-### 3. Optimizaciones
+### 3. Supabase WebSocket Fix (Hotfix)
+- **Singleton Pattern**: Cliente Supabase único para toda la app
+- **useMemo**: Referencias estables en auth-provider y todos los hooks
+- **Race Conditions**: Eliminadas conexiones WebSocket duplicadas
+- **Archivos**: client.ts, auth-provider.tsx, 5 hooks actualizados
+
+### 4. Optimizaciones
 - Memory leaks corregidos en AuthProvider
 - Llamadas redundantes eliminadas en middleware
 - Validación de variables de entorno en todos los puntos críticos
