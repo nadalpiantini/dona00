@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Delivery, DeliveryStatus } from '@/lib/types/database.types'
 import toast from 'react-hot-toast'
@@ -14,7 +14,8 @@ export function useDeliveries(filters?: {
   const [deliveries, setDeliveries] = useState<Delivery[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClient()
+  // Use singleton client - memoized to prevent recreation on re-renders
+  const supabase = useMemo(() => createClient(), [])
 
   useEffect(() => {
     loadDeliveries()

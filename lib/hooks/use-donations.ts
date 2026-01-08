@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Donation, DonationStatus } from '@/lib/types/database.types'
 import toast from 'react-hot-toast'
@@ -16,7 +16,8 @@ export function useDonations(filters?: {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [total, setTotal] = useState(0)
-  const supabase = createClient()
+  // Use singleton client - memoized to prevent recreation on re-renders
+  const supabase = useMemo(() => createClient(), [])
 
   const loadDonations = useCallback(async () => {
     try {

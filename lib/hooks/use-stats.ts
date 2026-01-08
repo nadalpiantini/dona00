@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/providers/auth-provider'
 
@@ -19,7 +19,8 @@ export function useStats() {
   })
   const [loading, setLoading] = useState(true)
   const { profile } = useAuth()
-  const supabase = createClient()
+  // Use singleton client - memoized to prevent recreation on re-renders
+  const supabase = useMemo(() => createClient(), [])
 
   const loadStats = useCallback(async () => {
     try {
